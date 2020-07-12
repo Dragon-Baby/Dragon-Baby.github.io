@@ -1,0 +1,465 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):高级GLSL | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):高级GLSL
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-09 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="高级glsl">高级GLSL</h1>
+<p>  这一节我们介绍一些内建变量，一些新的管理输入输出的方式，以及一个名为全局缓冲对象的有用的工具。</p>
+<h1 id="内建变量">内建变量</h1>
+<p>  GLSL通过gl_前缀来定义一些可以使用的变量，比如gl_Position作为顶点着色器的输出变量，在片元着色器中还有gl_FragCoord。下面来介绍一些其它的内建变量。</p>
+<h2 id="顶点着色器的变量">顶点着色器的变量</h2>
+<p>###gl_PointSize<br>
+  几种可渲染的基本体的其中一个为点，在OpenGL中的选项为GL_POINTS。我们可以通过gl_PointSize来设置点的大小。通过glPointSize我们可以设置点的宽度和高度（像素）。<br>
+  在OpenGL中默认不能调节点的大小，我们需要通过glEnable开启：</p>
+<pre><code class="language-cpp">glEnable(GL_PROGRAM_POINT_SIZE);
+</code></pre>
+<p>  我们可以在顶点着色其中将顶点大小设置为切割空间的顶点坐标的z值，即相对观察者的距离，距离越远点的大小越大：</p>
+<pre><code class="language-GLSL">void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0);    
+    gl_PointSize = gl_Position.z;    
+}  
+</code></pre>
+<p>  运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480876150.png" alt="" loading="lazy"></p>
+<h3 id="gl_vertexid">gl_VertexID</h3>
+<p>  gl_Position和gl_PointSize是顶点着色器的内建输出变量。顶点着色器也提供了一个输入变量gl_VertexID。这个整形变量代表当前点的ID。</p>
+<h2 id="片元着色器的变量">片元着色器的变量</h2>
+<p>##gl_FragCoord<br>
+  gl_FragCoord是一个输入变量，在深度测试时我们使用过gl_FragCoord，因为它的z组件代表深度值。我们也可以使用它的x、y值来进行一些操作。<br>
+  gl_FragCoord的x、y值代表屏幕的坐标，以左下角为原点。例如，我们可以将物体按屏幕坐标分割，并赋予不同的颜色：</p>
+<pre><code class="language-GLSL">void main()
+{             
+    if(gl_FragCoord.x &lt; 400)
+        FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    else
+        FragColor = vec4(0.0, 1.0, 0.0, 1.0);        
+}  
+</code></pre>
+<p>  运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480892997.png" alt="" loading="lazy"></p>
+<h3 id="gl_frontfacing">gl_FrontFacing</h3>
+<p>  在面消隐那一节我们提到过OpenGL通过观察方向的绘制顺序来判断是正面还是背面，而gl_FrontFacing正告诉了我们当前片段是属于正面还是背面部分。运用这个变量，我们可以控制正面和背面的颜色。<br>
+  gl_FrontFacing是一个bool类型的输入变量，如果为true就是正面，false就是背面。下面是一个例子：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+  
+in vec2 TexCoords;
+
+uniform sampler2D frontTexture;
+uniform sampler2D backTexture;
+
+void main()
+{             
+    if(gl_FrontFacing)
+        FragColor = texture(frontTexture, TexCoords);
+    else
+        FragColor = texture(backTexture, TexCoords);
+}  
+</code></pre>
+<p>  如果靠近物体，可以看到区别：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480911480.png" alt="" loading="lazy"></p>
+<h3 id="gl_fragdepth">gl_FragDepth</h3>
+<p>  gl_FragCoord是一个输入变量，允许我们读取屏幕空间坐标并获得深度值，但它是一个只可读变量。我们不能修改屏幕空间坐标，但我们可以修改片段的深度。GLSL提供输出变量gl_FragDepth来让我们修改片段的深度值。<br>
+  我们用0-1的值设置gl_FragDepth：</p>
+<pre><code class="language-GLSL">gl_FragDepth = 0.0;
+</code></pre>
+<p>  如果着色器没有给gl_FragDepth写入任何值，变量将会从gl_FragCoord.z获取值。<br>
+  但手动设置深度值有一个缺点，这是因为OpenGL在我们写入gl_FragDepth时会关闭提前深度测试。之所以会关闭是因为在运行片元着色器前OpenGL将无法得知片段的深度是什么。<br>
+  想要写入gl_FragDepth我们就必须将这一缺陷考虑进去。但从OpenGL4.2开始，我们可以稍微改善这一情况，在片元着色器的开头我们可以重新声明gl_FragDepth并添加一些与深度相关的条件：</p>
+<pre><code class="language-GLSL">layout (depth_&lt;condition&gt;) out float gl_FragDepth;
+</code></pre>
+<p>  这里的condition有以下几种选项：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480929275.png" alt="" loading="lazy"><br>
+  如果我们使用greater和less条件来保证之后写入的深度值只会大于或小于当前深度值，我们就仍可以使用提前深度测试。下面是一个片元着色器的例子：</p>
+<pre><code class="language-GLSL">#version 420 core // 注意GLSL的版本！
+out vec4 FragColor;
+layout (depth_greater) out float gl_FragDepth;
+
+void main()
+{             
+    FragColor = vec4(1.0);
+    gl_FragDepth = gl_FragCoord.z + 0.1;
+}  
+</code></pre>
+<h1 id="接口块">接口块</h1>
+<p>  到目前为止，每次从顶点着色器运送数据到片元着色器，我们会声明一些输入输出变量。为了管理这些输入输出变量，GLSL提块供类似于结构体的接口块来统一定义输入或输出变量。下面是一个例子：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoords;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+out VS_OUT
+{
+    vec2 TexCoords;
+} vs_out;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0);    
+    vs_out.TexCoords = aTexCoords;
+}  
+</code></pre>
+<p>  我们用out来定义这个接口块，接口块的名我们可以自己定义，但必须保证顶点着色器和片元着色器中的块名是一致的，如上述接口块在片元着色器中作为输入这样使用：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+
+in VS_OUT
+{
+    vec2 TexCoords;
+} fs_in;
+
+uniform sampler2D texture;
+
+void main()
+{             
+    FragColor = texture(texture, fs_in.TexCoords);   
+} 
+</code></pre>
+<p>  我们注意到一点，位于接口块定义的末尾的关键字为实例名称，这个名称在着色器之间不必一致，我们往往将实例名称定义的更符合着色器的需要。</p>
+<h1 id="全局缓冲对象">全局缓冲对象</h1>
+<p>  在学习OpenGL时，我们会发现在设置着色器的全局变量时，我们往往会设置许多功能重复的变量。OpenGL允许我们定义使用全局缓冲对象来定义一系列全局变量，并且着色器可以通用。<br>
+  和其它对象一样，全局缓冲对象也需要我们通过glGenBuffers创建，并绑定至GL_UNIFORM_BUFFER上，接着存储需要用到的统一变量。<br>
+  首先我们在顶点着色器中创建统一块来管理投影和视图矩阵：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+
+layout (std140) uniform Matrices
+{
+    mat4 projection;
+    mat4 view;
+};
+
+uniform mat4 model;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+}  
+</code></pre>
+<p>  由于大多数时候我们都要使用projection和view矩阵，所以我们可以将它们作为例子讲解。我们将这两个矩阵的数据存储在缓冲中，那么所有定义了这种统一块的着色器就都可以使用projection和view矩阵了。</p>
+<h2 id="统一块布局这一章实在不好翻译建议读原文">统一块布局(这一章实在不好翻译，建议读原文)</h2>
+<p>  统一块的内容存储在一个缓冲对象中，只代表一片预留的GPU全局内存区域。因为这片区域没有保存任何有关数据类型的信息，所以我们要告知OpenGL哪一块内存区域要和着色器中的哪一个统一变量相联系。<br>
+  下面是一个统一块的例子：</p>
+<pre><code class="language-GLSL">layout (std140) uniform ExampleBlock
+{
+    float value;
+    vec3  vector;
+    mat4  matrix;
+    float values[3];
+    bool  boolean;
+    int   integer;
+};  
+</code></pre>
+<p>  针对上面的统一块，我们需要知道内部每个变量的大小和偏移量，以便在缓冲中按顺序摆放。OpenGL清楚每一种变量的大小，但并不清楚每个变量之间的间隔。这样会导致硬件会按它所知道的方式摆放变量。比如，硬件可以将一个vec3的变量和一个float变量邻近摆放。但并不是所有的硬件都这么做，可能会将vec3填补为4个float构成的阵列再添加float变量。<br>
+  默认地，GLSL使用的统一内存布局称为分享布局——“分享”是因为一旦偏移量由硬件定义了，其它的程序之间将会共享这偏移量。通过分享布局，GLSL被允许改变统一变量的位置，只要变量的顺序保持完整。因为我们不知道每个统一变量的偏移量会是什么，所以我们不知道如何正确地填充我们的统一缓冲。<br>
+  使用分享布局可以给我们一些空间上的优化，我们需要为每个要参与计算的统一变量的偏移进行排序。然而一般情况下，我们不使用分享布局，而是使用std140布局。std140布局通过一些规则来标准化管理内存布局中的每个变量的偏移量。由于是标准化的，我们可以手动找出每个变量的偏移。<br>
+  每个变量都有一个基本校准，等价于使用std140布局规则的统一块下的变量使用的空间。对每个变量，我们计算它的校准偏移：从统一块头部开始的字节偏移量。这个校准偏移量必须等于基本校准的倍数。<br>
+  下面讲解一下最常用的布局规则。各种GLSL的变量，如int、float和bool，字节数目为4，每个4字节的存在用N来表示：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480960128.png" alt="" loading="lazy"><br>
+  根据这种规则我们来解释以下上面定义的统一块：</p>
+<pre><code class="language-GLSL">layout (std140) uniform ExampleBlock
+{
+                     // base alignment  // aligned offset
+    float value;     // 4               // 0 
+    vec3 vector;     // 16              // 16  (offset must be multiple of 16 so 4-&gt;16)
+    mat4 matrix;     // 16              // 32  (column 0)
+                     // 16              // 48  (column 1)
+                     // 16              // 64  (column 2)
+                     // 16              // 80  (column 3)
+    float values[3]; // 16              // 96  (values[0])
+                     // 16              // 112 (values[1])
+                     // 16              // 128 (values[2])
+    bool boolean;    // 4               // 144
+    int integer;     // 4               // 148
+}; 
+</code></pre>
+<p>  通过这些计算后的偏移量值，我们就可以使用类似glBufferSubData的方法来将每个变量的数据传入统一变量缓冲中。这并不是最有效的方法，std140布局要求我们在每个需要使用的这些变量的着色器中都都定义这种统一块。<br>
+  在统一块的定义前加上layout (std140)表明统一块使用std140布局。初次之外，还有另外两种布局。我们已经介绍过分享布局，还有一种布局是填充布局。当使用填充布局时，并不能保证每个程序的布局都是一致的，因为这种规则允许编译器脱离统一块的束缚来优化统一变量，所以每个着色器可能都不一样。</p>
+<h2 id="使用统一缓冲">使用统一缓冲</h2>
+<p>  首先创建统一缓冲对象，并将其绑定至相应的缓冲区。接着使用glBufferData开辟一片内存空间：</p>
+<pre><code class="language-cpp">unsigned int uboExampleBlock;
+glGenBuffers(1, &amp;uboExampleBlock);
+glBindBuffer(GL_UNIFORM_BUFFER, uboExampleBlock);
+glBufferData(GL_UNIFORM_BUFFER, 152, NULL, GL_STATIC_DRAW); // 开辟152字节大小得到内存空间
+glBindBuffer(GL_UNIFORM_BUFFER, 0);
+</code></pre>
+<p>  之后，每当我们想要更新或插入数据，我们使用绑定缓冲对象并使用glBufferSubData来更新数据。我们只需要更新一次统一缓冲，那么所有使用这个缓冲的着色器都会使用更新的数据。那么，如何将统一缓冲与统一块相联系？<br>
+  在OpenGL环境中，会定义一些绑定点来链接统一缓冲。一旦我们创建的统一缓冲，我们可以将它与这些绑定点链接，然后我们可以将统一块和相同的绑定点链接，这样就构建起了联系。下面的图表显示了这种关系：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480982595.png" alt="" loading="lazy"><br>
+  就像我们看到的，我们可以将不同的统一缓冲绑定到不同的绑定点。因为A和B着色器都有一个统一块绑定至绑定点0，它们的统一块共同享有uboMatrices中的数据，要求是在两个着色器中都要定义Matrices统一块。<br>
+  我们使用glUniformBlockBinding将着色器的统一块绑定到一个特定的绑定点，参数要求一个着色器程序对象，一个统一块的索引，和要绑定的绑定点。统一块索引是统一块在着色器中的位置索引，我们可以通过glGetUniformBlockIndex来获取，参数要求着色器程序对象和统一块名称。下面是一个例子：</p>
+<pre><code class="language-cpp">unsigned int lights_index = glGetUniformBlockIndex(shaderA.ID, &quot;Lights&quot;);   
+glUniformBlockBinding(shaderA.ID, lights_index, 2);
+</code></pre>
+<p>  注意我们需要为每一个着色器重复这一过程。<br>
+  在4.2版本之后，我们也可以直接在定义统一块的时候为其赋予绑定点，省去调用glGetUniformBlockIndex和glUniformBlockBinding。例子如下：</p>
+<pre><code class="language-GLSL">layout(std140, binding = 2) uniform Lights { ... };
+</code></pre>
+<p>  同样，我们需要将统一缓冲绑定至相应的绑定点。使用glBindBufferBase或glBindBufferRange：</p>
+<pre><code class="language-cpp">glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboExampleBlock); 
+// or
+glBindBufferRange(GL_UNIFORM_BUFFER, 2, uboExampleBlock, 0, 152);
+</code></pre>
+<p>  glBindBufferRange的不同指出在于我们可以指定缓冲区数据的偏移量和大小。<br>
+  最后我们要做的就是将数据传入统一缓冲区。我们使用glBufferSubData来传入数据。例如，为了传入统一变量boolean，我们可以这么做：</p>
+<pre><code class="language-cpp">glBindBuffer(GL_UNIFORM_BUFFER, uboExampleBlock);
+int b = true; // bool变量在GLSL中为4个字节，所以我们可以用整形来定义
+glBufferSubData(GL_UNIFORM_BUFFER, 144, 4, &amp;b); 
+glBindBuffer(GL_UNIFORM_BUFFER, 0);
+</code></pre>
+<h2 id="一个例子">一个例子</h2>
+<p>  回顾之前的所有案例，我们发现经常会使用这三个矩阵：projection，view, model。由于model矩阵会中不断的变化，所以我们不在统一块中定义。<br>
+  我们将projection和view矩阵存储在名为Matrices的统一块中，顶点着色器如下：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+
+layout (std140) uniform Matrices
+{
+    mat4 projection;
+    mat4 view;
+};
+uniform mat4 model;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+}  
+</code></pre>
+<p>  我们将绘制四个不同的颜色的立方体，每个立方体使用不同的着色器程序。立方体的顶点着色器相同，但使用不同的片元着色器。<br>
+  首先，我们将每个统一块绑定至绑定点0处：</p>
+<pre><code class="language-cpp">unsigned int uniformBlockIndexRed    = glGetUniformBlockIndex(shaderRed.ID, &quot;Matrices&quot;);
+unsigned int uniformBlockIndexGreen  = glGetUniformBlockIndex(shaderGreen.ID, &quot;Matrices&quot;);
+unsigned int uniformBlockIndexBlue   = glGetUniformBlockIndex(shaderBlue.ID, &quot;Matrices&quot;);
+unsigned int uniformBlockIndexYellow = glGetUniformBlockIndex(shaderYellow.ID, &quot;Matrices&quot;);  
+  
+glUniformBlockBinding(shaderRed.ID,    uniformBlockIndexRed, 0);
+glUniformBlockBinding(shaderGreen.ID,  uniformBlockIndexGreen, 0);
+glUniformBlockBinding(shaderBlue.ID,   uniformBlockIndexBlue, 0);
+glUniformBlockBinding(shaderYellow.ID, uniformBlockIndexYellow, 0);
+</code></pre>
+<p>  接着，我们创建统一缓冲对象并将其绑定至绑定点0处：</p>
+<pre><code class="language-cpp">unsigned int uboMatrices
+glGenBuffers(1, &amp;uboMatrices);
+  
+glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+glBindBuffer(GL_UNIFORM_BUFFER, 0);
+  
+glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
+</code></pre>
+<p>  首先，我们开辟一片大小为2*sizeof(glm::mat4)的内存空间来传入两个矩阵的数据。接着我们将缓冲中对应的数据绑定至绑定点0。<br>
+  现在要做的是在缓冲中填满数据。我们使用glBufferSunData将投影矩阵的数据传入缓冲区：</p>
+<pre><code class="language-cpp">glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.1f, 100.0f);
+glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+glBindBuffer(GL_UNIFORM_BUFFER, 0);  
+</code></pre>
+<p>  这段操作在渲染循环前进行，因为我们只需要插入一次projection矩阵即可，毕竟不会变。<br>
+  接着在渲染循环中，我们将view矩阵传入缓冲区（每时每刻都会变化，但是是公用的）：</p>
+<pre><code class="language-cpp">glm::mat4 view = camera.GetViewMatrix();	       
+glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+glBindBuffer(GL_UNIFORM_BUFFER, 0);  
+</code></pre>
+<p>  接下来只需要照常绘制立方体就行(记得为每个立方体的model矩阵赋值)：</p>
+<pre><code class="language-cpp">glBindVertexArray(cubeVAO);
+// 绘制红立方体
+shaderRed.use();
+glm::mat4 model = glm::mat4(1.0f);
+model = glm::translate(model, glm::vec3(-0.75f, 0.75f, 0.0f));	// move top-left
+shaderRed.setMat4(&quot;model&quot;, model);
+glDrawArrays(GL_TRIANGLES, 0, 36);        
+// ... 绘制绿立方体
+// ... 绘制蓝立方体
+// ... 绘制黄立方体
+</code></pre>
+<p>  运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481006303.png" alt="" loading="lazy"><br>
+  这里贴出原文代码：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/8.advanced_glsl_ubo/advanced_glsl_ubo.cpp">Code</a>。<br>
+  总结一下，统一缓冲对象有以下几个优点：可以一次设置大量的统一变量；想改变不同着色器的相同统一变量，通过统一缓冲对象这是一个非常快速的方法；最后，我们可以通过统一缓冲对象在着色器中使用更多的统一变量。关于最后一点，我们知道OpenGL是有定义统一变量数量上限的，可以通过GL_MAX_VERTEX_UNIFORM_COMPONENTS得到，但如果使用统一缓冲对象，这一数量限制的上线就高了许多。<br>
+  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL">https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglgao-ji-shu-ju/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):高级数据
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

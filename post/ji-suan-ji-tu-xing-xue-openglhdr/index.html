@@ -1,0 +1,279 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):HDR | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):HDR
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-15 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>  默认情况下，存储在帧缓冲的亮度和颜色值的范围被限制在[0,1]。这种范围在一般情况下可行，但如果场景中的片段的亮度本身超过1我们依旧把它限制在1以内的话，场景的亮度或颜色就不太正常了，下面是一个例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483379918.png" alt="" loading="lazy"><br>
+  因为大量超过1.0亮度或颜色的片段的亮度或颜色被限制在[0,1]以内，这些片段就会有完全相同的颜色，这样就会出现大片区域的颜色一样，场景的细节也就丢失了。<br>
+  解决这一问题的方式是允许颜色值暂时超过[0,1]的范围，在最后的步骤中再将颜色转化到[0,1]的范围。<br>
+  显示器的颜色显示被限制在[0,1]范围内，但光照计算时没有这种限制。通过允许片段的颜色超过1.0，我们可以在更高的颜色范围内工作，这种方式称为高动态范围(HDR)。通过使用这个高动态范围，亮的地方会保持亮，暗的地方会保持暗，二者的细节都不会丢失。<br>
+  HDR最初只是让摄影师拍摄的技术，可以通过调整曝光度拍摄同一场景获得多张照片，来获取大范围的颜色区域。将这些照片组合起来形成一张HDR图片，在组合的曝光度上显示大范围的颜色细节，或者使用一个特别的曝光度来观察。举个例子，下面的三张照片中，左侧的照片在低曝光度下，窗户的细节比较丰富，中间的照片提高曝光度后，窗户的细节就丢失了，但室内的场景可以看的比较清楚，但细节不是很丰富，进一步提升曝光度后，第三张照片的窗户的细节彻底没有了，但室内的细节反而更丰富了。<br>
+<img src="https://dragon-baby.github.io/post-images/1594483388834.png" alt="" loading="lazy"><br>
+  上面的例子和人类的眼睛的工作原理很相似，也和高动态范围渲染的原理很相似。当光照很弱时，人的眼睛适应这一光照，暗处就会看的比较清晰，光照很强时同理。可以说人的眼睛可以根据场景的亮度自动调节曝光度。<br>
+  HDR的工作原理和人的眼睛有一些像，我们允许渲染时使用大范围内的颜色值，收集大范围的暗处和亮处细节，最后我们将所有HDR值转化到低动态范围(LDR),即[0.0,1.0]。这一将HDR转化到LDR的过程称为色调映射，针对这一过程目前存在大量的算法来保证HDR的细节能够传递至LDR，这些算法也大都将曝光度作为参数来有选择地影响亮处和暗处。<br>
+  在实时渲染中，高动态范围不仅允许我们超过LDR的范围，保留更多的细节，也让我们有能力去通过真实的亮度去调整光源的亮度。例如，太阳的亮度远高于手电筒的亮度，所以我们可以调整太阳的亮度（比如漫反射亮度值为100.0），这允许我们通过真实的参数去更为合适的调整场景的光照。<br>
+  因为非HDR显示器只显示LDR范围的颜色，所以我们需要将HDR的范围调整回LDR，但简单的转化会丢失很多的细节，这样就要用到我们之前说的色调映射。<br>
+  为了能够使用HDR渲染，我们需要一些方法来保证颜色值不会再片段着色器渲染时被限制到[0,1]内。当转换冲使用类似GL_RGB的配置作为颜色缓冲类型时，OpenGL会自动进行范围限制，然后才会将颜色存储在帧缓冲中。这一操作对大多数帧缓冲的附加项类型都是用，除了浮点格式。<br>
+  当帧缓冲的颜色缓冲类型被配置为GL_RGB16F,GL_RGBA16F,GL_RGB32F或GL_RGBA32F时，帧缓冲就被称为浮点型帧缓冲，可以存储超出[0,1]范围的浮点值，这对HDR来说非常适用。<br>
+  创建浮点帧缓冲，我们只需要将其颜色缓冲附加项的格式进行修改：</p>
+<pre><code class="language-cpp">glBindTexture(GL_TEXTURE_2D, colorBuffer);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);  
+</code></pre>
+<p>  接下来将这个颜色缓冲附加到帧缓冲上后，我们使用这个帧缓冲渲染，场景中的颜色值不会被限制在[0,1]内。渲染时我们首先将场景渲染至帧缓冲中，接着将其颜色缓冲显示在屏幕平面上：</p>
+<pre><code class="language-cpp">glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+    // [...] render (lit) scene 
+glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+// now render hdr colorbuffer to 2D screen-filling quad with tone mapping shader
+hdrShader.use();
+glActiveTexture(GL_TEXTURE0);
+glBindTexture(GL_TEXTURE_2D, hdrColorBufferTexture);
+RenderQuad();
+</code></pre>
+<p>  针对设个场景，我们创建一个长立方体来作为通道，并设置4个点光源，其中一个在通道的尽头，亮度非常大：</p>
+<pre><code class="language-cpp">std::vector&lt;glm::vec3&gt; lightColors;
+lightColors.push_back(glm::vec3(200.0f, 200.0f, 200.0f));
+lightColors.push_back(glm::vec3(0.1f, 0.0f, 0.0f));
+lightColors.push_back(glm::vec3(0.0f, 0.0f, 0.2f));
+lightColors.push_back(glm::vec3(0.0f, 0.1f, 0.0f));  
+</code></pre>
+<p>  最后显示在屏幕上时，我们定义一个简单的着色器程序来显示帧缓冲的颜色缓冲：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+  
+in vec2 TexCoords;
+
+uniform sampler2D hdrBuffer;
+
+void main()
+{             
+    vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+    FragColor = vec4(hdrColor, 1.0);
+}  
+</code></pre>
+<p>  不过这么直接转换，在片元着色器器运行后，颜色值还是会被限制在[0.0, 1.0]内，但我们实际的颜色应该有的超过这个范围。<br>
+<img src="https://dragon-baby.github.io/post-images/1594483404901.png" alt="" loading="lazy"><br>
+  所以说为了保留HDR的细节，我们在片元着色器中实现色调映射算法。</p>
+<h2 id="色调映射">色调映射</h2>
+<p>  色调映射算法将HDR的范围的颜色值映射为LDR的范围，但不丢失太多的细节。<br>
+  有一种使用最多的是莱因哈特色调映射，它均衡的将向LDR范围映射所有的亮度值，下面我们调整之前的片元着色器，并使用伽马矫正来做一些颜色调整。</p>
+<pre><code class="language-GLSL">void main()
+{             
+    const float gamma = 2.2;
+    vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+  
+    // reinhard tone mapping
+    vec3 mapped = hdrColor / (hdrColor + vec3(1.0));
+    // gamma correction 
+    mapped = pow(mapped, vec3(1.0 / gamma));
+  
+    FragColor = vec4(mapped, 1.0);
+}   
+</code></pre>
+<p>  这样的话，场景中亮度过高的地方我们就看得清了：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483415549.png" alt="" loading="lazy"><br>
+  我们还可以使用不同的曝光度来进行色调映射，之前提到过，在亮度太高的地方使用低曝光度，在较暗的地方使用高曝光度，下面是使用曝光度色调映射的一个例子：</p>
+<pre><code class="language-GLSL">uniform float exposure;
+
+void main()
+{             
+    const float gamma = 2.2;
+    vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+  
+    // Exposure tone mapping
+    vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
+    // Gamma correction 
+    mapped = pow(mapped, vec3(1.0 / gamma));
+  
+    FragColor = vec4(mapped, 1.0);
+}  
+</code></pre>
+<p>  这样，我们可以通过调整曝光度来获得不同的映射效果，来适应不同亮度的场景，下面是几个例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483425709.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/6.hdr/hdr.cpp">Code</a>。</p>
+<h2 id="其它的hdr技术">其它的HDR技术</h2>
+<p>  这里介绍的莱因哈特色调映射和曝光度色调映射只是色调映射技术的冰山一角，我们可以在网络上查到更多的色调映射方式。还有一种HDR技术类别是自动曝光度调整或人眼适应技术，顾名思义，可以根据场景的亮度自动调节曝光度来保留暗处或亮处的细节。<br>
+  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-Lighting/HDR">https://learnopengl.com/Advanced-Lighting/HDR</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglshi-chai-tie-tu/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):视差贴图
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):延后渲染 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):延后渲染
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-15 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>  至今位置我们使用的渲染方式都是正向渲染，一种直接根据场景中的光源计算光照的方法，对场景中的每个物体都进行这样的渲染。因为要对场景中的每个片段都遍历一遍场景中相应的光源，这种开销对复杂的场景来说是巨大的。正向渲染也会浪费许多次片元着色器的运营，如果场景深度过于复杂（不同的物体覆盖相同的屏幕像素），许多片元着色器的输出会被重写。<br>
+  延后渲染的目的就是通过彻底改变我们渲染物体的方式来克服这些问题。这一方法让我们有更多新的方式来高效地优化场景，即使场景中有大量的光源，也可以让我们以稳定的帧率显示场景。下面的场景包含1847个点光源，通过延后渲染得到渲染结果，这是正向渲染做不到的：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483752453.png" alt="" loading="lazy"><br>
+  延后渲染基于的理念是将那些复杂的渲染操作（如光照计算）推迟一些进行。延后渲染包含两个阶段，第一个阶段是几何阶段(geometry pass)，在这期间，我们渲染场景一次，并从中获取场景中物体所包含的所有几何信息，并将这些几何信息(比如位置、颜色、法线、高光值)存储在一系列纹理当中，统称为G缓冲。存储在G缓冲中的几何信息会在之后被用于光照计算。下面是某个场景的G缓冲构成：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483766948.png" alt="" loading="lazy"><br>
+  延后渲染的第二个阶段为光照阶段(lighting pass)，在这期间，我们渲染一张充满屏幕的平面，并使用存储在G缓冲中的几何信息计算每个片段的光照，逐像素地进行计算。我们不再让每个物体都经历一次从几何着色器到片元着色器的阶段，而是将其中的高级片段处理分离出来，之后单独进行计算。光照计算没有任何变化，只不过使用的所有输入数据都来自于G缓冲，而不是顶点着色器(包括一些uniform变量)。<br>
+  下面的图展示了这个流程：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483778722.png" alt="" loading="lazy"><br>
+  延后渲染最主要的优势在于G缓冲中的片段就是最后显示在屏幕上的片段信息，深度测试已经保证了显示的片段就是最上面的片段。这个优势就保证了对每个我们在光照阶段处理的像素，我们只需要进行一次光照计算即可。此外，延后渲染也让我们有能力作进一步的优化处理，允许我们渲染包含大量光源的场景。<br>
+  同时，延后渲染也有一些不利的地方，因为我们要将大量的数据存储在G缓冲中，这是比较占用内存的。另外，延后渲染是不支持混合的（因为我们存储在G缓冲中的片段信息是经过深度测试的在最上面的片段），另外，多重采样抗锯齿也不能使用，但针对这些我们也有应对方法。</p>
+<h2 id="g缓冲">G缓冲</h2>
+<p>  G缓冲包含一系列纹理，用来存储用来计算光照的几何信息，下面是我们要存储在G缓冲中的一些数据：</p>
+<ul>
+<li>用来计算片段位置变量的一个3D世界空间位置向量。</li>
+<li>一个RGB漫反射颜色向量，也被称为反照率(albedo)。</li>
+<li>一个用来决定平面倾斜程度的法线向量。</li>
+<li>一个高光强度的float值。</li>
+<li>所有光源的位置和颜色向量。</li>
+<li>观察者位置向量。</li>
+</ul>
+<p>  通过这些每个片段拥有的变量，我们就可以用来计算我们熟悉的Phong光照或Blinn-Phong光照。光源的位置和颜色，观察者的位置，这几个可以通过Unifrom变量配置，但其它的变量都是所有片段特有的。<br>
+  在OpenGL中，纹理中存储什么数据并没有限制，所以我们可以将所有逐片段的数据存储在一张或多张纹理中。因为G缓冲的纹理和光照阶段渲染的2D平面大小一样，我们可以使用之间在正向渲染中设置的片段数据。下面使用伪代码表示的整个处理过程：</p>
+<pre><code class="language-cpp">while(...) // render loop
+{
+    // 1. 几何阶段，渲染所有的几何\颜色数据到G缓冲中
+    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    glClearColor(0.0, 0.0, 0.0, 1.0); // keep it black so it doesn't leak into g-buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gBufferShader.use();
+    for(Object obj : Objects)
+    {
+        ConfigureShaderTransformsAndUniforms();
+        obj.Draw();
+    }  
+    // 2. l光照阶段：使用G缓冲中的数据计算场景光照
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    lightingPassShader.use();
+    BindAllGBufferTextures();
+    SetLightingUniforms();
+    RenderQuad();
+}
+</code></pre>
+<p>  我们需要存储的数据是每个片段的位置向量、法线、颜色、高光强度。在几何阶段我们可以使用多重渲染目标(MRT)在一次渲染过程中渲染到多个颜色缓冲。<br>
+  几何阶段，我们首先创建一个名为gBuffer的帧缓冲，并拥有多个颜色缓冲和一个深度渲染缓冲对象。对于位置和法线纹理，我们使用高精度的纹理（比如16bit或32bit），对于漫反射和高光强度值，使用默认的纹理即可(8bit)。注意我们使用的是GL_RGBA16F而不是GL_RGB16F，为了字节对齐，GPU一般使用<br>
+4个组件的格式。</p>
+<pre><code class="language-cpp">unsigned int gBuffer;
+glGenFramebuffers(1, &amp;gBuffer);
+glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+unsigned int gPosition, gNormal, gColorSpec;
+  
+// - 位置
+glGenTextures(1, &amp;gPosition);
+glBindTexture(GL_TEXTURE_2D, gPosition);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+  
+// -法线
+glGenTextures(1, &amp;gNormal);
+glBindTexture(GL_TEXTURE_2D, gNormal);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+  
+// - 漫反射+高光
+glGenTextures(1, &amp;gAlbedoSpec);
+glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+  
+// -配置多重渲染目标(COLOR_ATTACHMENT)
+unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+glDrawBuffers(3, attachments);
+  
+// 添加深度渲染缓冲对象
+[...]
+</code></pre>
+<p>  接着我们需要渲染场景到G缓冲。我们使用下面的片元着色器：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) out vec3 gPosition;
+layout (location = 1) out vec3 gNormal;
+layout (location = 2) out vec4 gAlbedoSpec;
+
+in vec2 TexCoords;
+in vec3 FragPos;
+in vec3 Normal;
+
+uniform sampler2D texture_diffuse1;
+uniform sampler2D texture_specular1;
+
+void main()
+{    
+    // 存储片元位置到gPosition纹理
+    gPosition = FragPos;
+    // 存储法线到gNormal纹理
+    gNormal = normalize(Normal);
+    // 存储漫反射到gAlbedoSpec纹理的rgb通道
+    gAlbedoSpec.rgb = texture(texture_diffuse1, TexCoords).rgb;
+    // 存储高光值到glAldeboSpec纹理的alpha通道
+    gAlbedoSpec.a = texture(texture_specular1, TexCoords).a;
+</code></pre>
+<p>  接下来将场景渲染到G缓冲中，并观察相应的数据（通过渲染到屏幕平面），就会得到下面的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483807111.png" alt="" loading="lazy"><br>
+  我们可以观察上面的图片来检查相关数据是否正确。</p>
+<h2 id="光照阶段">光照阶段</h2>
+<p>  接下来我们就可以使用G缓冲中的数据来计算光照了。因为G缓冲中的值代表的是最终要显示的每个片段的信息，我们只需要进行一次光照计算。<br>
+  我们将场景渲染到一个屏幕平面上：</p>
+<pre><code class="language-cpp">glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+glActiveTexture(GL_TEXTURE0);
+glBindTexture(GL_TEXTURE_2D, gPosition);
+glActiveTexture(GL_TEXTURE1);
+glBindTexture(GL_TEXTURE_2D, gNormal);
+glActiveTexture(GL_TEXTURE2);
+glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+// also send light relevant uniforms
+shaderLightingPass.use();
+SendAllLightUniformsToShader(shaderLightingPass);
+shaderLightingPass.setVec3(&quot;viewPos&quot;, camera.Position);
+RenderQuad();  
+</code></pre>
+<p>  我们将G缓冲中的纹理送往片元着色器，并定义光源的一些参数(场景包含32个点光源)：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+  
+in vec2 TexCoords;
+
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedoSpec;
+
+struct Light {
+    vec3 Position;
+    vec3 Color;
+};
+const int NR_LIGHTS = 32;
+uniform Light lights[NR_LIGHTS];
+uniform vec3 viewPos;
+
+void main()
+{             
+    // retrieve data from G-buffer
+    vec3 FragPos = texture(gPosition, TexCoords).rgb;
+    vec3 Normal = texture(gNormal, TexCoords).rgb;
+    vec3 Albedo = texture(gAlbedoSpec, TexCoords).rgb;
+    float Specular = texture(gAlbedoSpec, TexCoords).a;
+    
+    // then calculate lighting as usual
+    vec3 lighting = Albedo * 0.1; // hard-coded ambient component
+    vec3 viewDir = normalize(viewPos - FragPos);
+    for(int i = 0; i &lt; NR_LIGHTS; ++i)
+    {
+        // diffuse
+        vec3 lightDir = normalize(lights[i].Position - FragPos);
+        vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Albedo * lights[i].Color;
+        lighting += diffuse;
+    }
+    
+    FragColor = vec4(lighting, 1.0);
+}  
+</code></pre>
+<p>  效果本身不会有变化，不过大大降低了运算的开销，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483822303.png" alt="" loading="lazy"><br>
+  但就像之前说的，延后渲染不能进行混合操作（因为需要多个不同深度的片段，而G缓冲存储的是每个像素对应一个片段），另一个问题是强制使用相同的光照算法来进行场景光照。<br>
+  为了克服这些问题，我们可以将渲染分为两部分：一部分进行延后渲染，另一部分延后渲染做不到的我们使用正向渲染。</p>
+<h2 id="延后渲染和正向渲染结合使用">延后渲染和正向渲染结合使用</h2>
+<p>  我们这里想将每个光源作为一个立方体渲染，首先的想法是在延后渲染后，再正向渲染所有的光源，大致代码如下：</p>
+<pre><code class="language-cpp">// 延后渲染步骤
+[...]
+RenderQuad();
+  
+// 使用正向渲染渲染光源
+shaderLightBox.use();
+shaderLightBox.setMat4(&quot;projection&quot;, projection);
+shaderLightBox.setMat4(&quot;view&quot;, view);
+for (unsigned int i = 0; i &lt; lightPositions.size(); i++)
+{
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, lightPositions[i]);
+    model = glm::scale(model, glm::vec3(0.25f));
+    shaderLightBox.setMat4(&quot;model&quot;, model);
+    shaderLightBox.setVec3(&quot;lightColor&quot;, lightColors[i]);
+    RenderCube();
+}
+</code></pre>
+<p>  然而，因为完全没有考虑延后渲染的深度值，所有立方体都将出现在延后渲染场景的前面（仿佛一张背景图片）：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483834687.png" alt="" loading="lazy"><br>
+  我们需要做的是将存储在几何阶段的深度信息复制到默认的帧缓冲的深度缓冲中，接着渲染立方体才是正常的。<br>
+  我们可以通过glBlitFramebuffer来将一个帧缓冲的内容复制到另一个帧缓冲（位块运输）。<br>
+  我们像下面这样将gBuffer中的深度信息传输到默认的帧缓冲中：</p>
+<pre><code class="language-cpp">glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+glBlitFramebuffer(
+  0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST
+);
+glBindFramebuffer(GL_FRAMEBUFFER, 0);
+// now render light cubes as before
+[...]  
+</code></pre>
+<p>  上面的代码中我们将gBuffer中所有的深度信息都传输到了默认的帧缓冲的深度缓冲位置。修改后的运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483850624.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/8.1.deferred_shading/deferred_shading.cpp">Code</a>。</p>
+<h2 id="大量光源">大量光源</h2>
+<p>  延后渲染被认为的优势是可以渲染庞大数量的光源，不需要太大的开销。但其实延后渲染本身其实不支持巨大数量的光源，因为我们仍需要逐片段根据场景中的光源计算光照。让渲染大量光源称为可能的技术是灯光体(light volumes)。<br>
+  平常渲染光照场景时，我们会计算每个光源对片段颜色的贡献，并不关心它们到片段的距离，但其实有很大一部分的光源不会对片段的颜色产生影响，这样就会白白浪费许多光照计算的次数。<br>
+  而灯光体的目的就是计算光源的覆盖范围的半径或体积，在这之中的片段才会受到这个光源的影响。由于大多数光源都会使用不同形式的衰减，我们可以通过这一信息计算光源覆盖范围的最大距离或最大半径。对处在这个最大光源覆盖范围内的片段进行开销大的光照计算，可以节省大量无用的计算次数。</p>
+<h3 id="计算灯光的作用范围">计算灯光的作用范围</h3>
+<p>  为计算灯光作用范围，我们需要获取灯光衰减到0时的距离。下面给出衰减公式：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483864150.png" alt="" loading="lazy"><br>
+  由于这个衰减值永远大于0，所以不能直接计算，我们可以用一个近似值来计算。对我们这一节的场景来说，5/256是一个比较好的值。</p>
+<blockquote>
+<p>  注意，上述衰减公式的视觉上的结果是大部分区域是很暗的，如果我们设置的值过小的话，灯光体的范围就太大，这样的话计算开销并不会减少多少，所以我们尽量设置一个可视边界范围左右的值。</p>
+</blockquote>
+<p>  衰减等式修改如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483874142.png" alt="" loading="lazy"><br>
+  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>I</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub></mrow><annotation encoding="application/x-tex">I_{max}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">m</span><span class="mord mathdefault mtight">a</span><span class="mord mathdefault mtight">x</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>是光源最亮的值。接着运算过程如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483884371.png" alt="" loading="lazy"><br>
+  最后的等式是一个二次方程的形式<br>
+<img src="https://dragon-baby.github.io/post-images/1594483899944.png" alt="" loading="lazy"><br>
+，我们可以简单的计算出距离：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483917006.png" alt="" loading="lazy"><br>
+  通过给出常量、一次项系数和二次项系数，我们就可以计算出半径：</p>
+<pre><code class="language-cpp">float constant  = 1.0; 
+float linear    = 0.7;
+float quadratic = 1.8;
+float lightMax  = std::fmaxf(std::fmaxf(lightColor.r, lightColor.g), lightColor.b);
+float radius    = 
+  (-linear +  std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0 / 5.0) * lightMax))) 
+  / (2 * quadratic);  
+</code></pre>
+<p>  计算出光源的作用范围半径后，我们就可以在片元着色器中决定当前片段是否受某一光源影响：</p>
+<pre><code class="language-GLSL">struct Light {
+    [...]
+    float Radius;
+}; 
+  
+void main()
+{
+    [...]
+    for(int i = 0; i &lt; NR_LIGHTS; ++i)
+    {
+        // calculate distance between light source and current fragment
+        float distance = length(lights[i].Position - FragPos);
+        if(distance &lt; lights[i].Radius)
+        {
+            // do expensive lighting
+            [...]
+        }
+    }   
+}
+</code></pre>
+<p>  运行结果和之前没有什么区别，只是再一次降低了运算开销。<br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/8.2.deferred_shading_volumes/deferred_shading_volumes.cpp">Code</a>。</p>
+<h2 id="如何真正使用灯光体">如何真正使用灯光体</h2>
+<p>  上面的片元着色器其实实际上并不怎么好使，只是帮助说明了怎么使用灯光体来减少运算。GPU和GLSL非常不擅长处理循环和分支，原因在于在GPU上着色器是高度并行执行的，而且大多数针对多线程的架构需要运行许多一样的着色器代码，这就意味着一个着色器的运行需要执行所有分支的if语句来确保对所有的线程，着色器的运行都是一致的，这样的话，我们之前的灯光作用范围检查其实没啥太大的作用，我们还是进行了光照计算。<br>
+  使用灯光体最合适的方法是渲染一个实际存在的球体，并通过我们计算的灯光体半径进行相应的缩放。这个球体的中心是一个光源，整个球体是它的作用范围，而核心技巧在于：我们使用延后渲染渲染这个球体。这个球体将减少片元着色器的调用，并且渲染的范围就是光源的影响范围，我们是渲染相关的像素，抛弃其它的像素。下面的图说明了这一点：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483937531.png" alt="" loading="lazy"><br>
+  我们对场景中所有的光源都使用这一方法，结果的像素会相互混合颜色，这样，渲染的场景和之前完全一致，但我们真正减少了大量的开销。而正是因为这一灯光体的特性，才让延后渲染可以支持渲染拥有庞大数量的光源的场景。<br>
+  但这个方法还是有一个问题，我们需要开启面消隐（不开启会渲染两次灯光的影响），但如果开启了面消隐，观察者如果将视角移到灯光球体内部，是看不到相应的光照的。我们可以通过只渲染灯光球体的背面来解决这一问题。<br>
+  延后渲染还有两个扩展算法：延后光照和基于平铺的延后渲染，这两个算法在渲染大数量的光源时更有效率，并且也支持MSAA。</p>
+<h2 id="延后渲染vs正向渲染">延后渲染vs正向渲染</h2>
+<p>  没有灯光体的延后渲染，针对正向渲染来说，本身一个不错的技术，可以避免针对某一像素的计算过多的调用片元着色器，但也有一些缺点，内存要求高，不支持MSAA，只能在正向渲染中实现混合。<br>
+  如果场景不复杂，没有太多的光源，使用正向渲染反而更有效率，但针对复杂场景，延后渲染时第一选择。<br>
+  理论上，所有正向渲染的操作都可以转化到延后渲染进行。比如我们想在延后渲染中实现法线贴图，我们可以在几何阶段，让着色器输出从法线贴图提取的世界空间法线向量(使用TBN矩阵)，光照阶段不需要任何改变；如果想要是视差贴图，我们就需要现在几何阶段置换纹理坐标，接着才进行其它纹理的采样。<br>
+  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-Lighting/Deferred-Shading">https://learnopengl.com/Advanced-Lighting/Deferred-Shading</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglfa-guang/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):发光
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

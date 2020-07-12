@@ -1,0 +1,262 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):深度测试 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):深度测试
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-07 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="深度测试">深度测试</h1>
+<p>  在坐标系那一章我们使用了深度缓冲来避免本应绘制在后面的三角形出现在前面。接下来我们深入学习一下深度缓冲(z-缓冲)。<br>
+  深度缓冲是一种缓冲的类别，类似于颜色缓冲，它存储每一个片元的一类信息。深度缓冲由窗口系统自动创建并借按照16、24或32bits的float类型存储深度值，大多数系统的深度值是24bits。<br>
+  开启深度测试后，OpenGL将片段的深度值和深度缓冲中的深度值进行比较，如果测试通过，片段将被渲染并更新深度缓冲中的值，如果测试失败，则会忽略片段。<br>
+  深度测试在片元着色器运行之后开始，并处在屏幕空间。屏幕空间的坐标(以左下角为原点)通过OpenGL的glViewport方法转化，并且储存在片元着色器的gl_FragCoord变量中。当然，除开x、y坐标，gl_FragCoord的z组件存储着深度信息。<br>
+  （注意，如见大多数GPU提供了一种提前深度测试的技术，可以在使用片元着色器前进行深度测试。）<br>
+  深度测试时默认关闭的，所以我们在需要使用时用glEnable(GL_DEPTH_TEST)开启：</p>
+<pre><code class="language-cpp">glEnable(GL_DEPTH_TEST);
+</code></pre>
+<p>  一旦开启深度测试，并通过深度测试的话，OpenGL将在深度缓冲中存储片元的z值，反之，就会忽略片段。当然，在渲染循环中我们需要清除深度缓冲来更新深度缓冲中的值：</p>
+<pre><code class="language-cpp">glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+</code></pre>
+<p>  有时候我们可能不想更新深度缓冲中的值，那么我们可以用下面的方法来禁止深度缓冲的写入：</p>
+<pre><code class="language-cpp">glDepthMask(GL_FALSE);
+</code></pre>
+<h2 id="深度测试选项">深度测试选项</h2>
+<p>  OpenGL允许我们修改深度测试的比较表达式，来控制OpenGL对片段的忽略和对深度缓冲的更新。我们可以通过glDepthFunc来设置，例如：</p>
+<pre><code class="language-cpp">glDepthFunc(GL_LESS);
+</code></pre>
+<p>  这个方法由下面几个参数供选择：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479426851.png" alt="" loading="lazy"><br>
+  OpenGL默认使用GL_LESS。<br>
+  下面是两个对比的例子。我们先将深度测试的参数设为GL_ALWAYS:<br>
+<img src="https://dragon-baby.github.io/post-images/1594479435922.png" alt="" loading="lazy"><br>
+  这个设置相当于没有开启深度测试，由于我们最后绘制的地面，所以它显示在最前面。<br>
+  接着将参数修改为GL_LESS:<br>
+<img src="https://dragon-baby.github.io/post-images/1594479447452.png" alt="" loading="lazy"><br>
+  可以看到正常了许多。</p>
+<h2 id="深度值精度">深度值精度</h2>
+<p>  深度缓冲中的深度值的范围为0.0-1.0，这些深度值与当前的屏幕空间中对象的深度值进行比较中。但在视图空间，这些深度值可以是任意位于投影视锥的两个远近平面之间的值。我们需要某种方式将这些视图空间中的深度值转化到[0,1]的范围，其中一种方法是线性变换：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479459606.png" alt="" loading="lazy"><br>
+  这里的near和far分别是视锥的两个平面的距离。如果near =1,far=50，那么函数曲线如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479473609.png" alt="" loading="lazy"><br>
+  然而在实际工作中，我们几乎不使用线性变换。由于投影的属性，我们使用1/z来计算深度值，结果是在z很小时精度很高，在z较大是精度会较低。等式如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479489614.png" alt="" loading="lazy"><br>
+  函数曲线如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479503354.png" alt="" loading="lazy"><br>
+  我们需要记住，在视图空间中深度缓冲中的值为线性分布，但在切割空间中成非线性分布（由于使用的投影变换），因此深度值为0.5也并不代表像素的z值在视锥的中间。上述的等式是和投影矩阵挂钩的，所以当我们将顶点坐标从视图空间转至切割空间再转至屏幕空间时，我们才使用这个非线性等式。这里提供一篇详细介绍投影矩阵的文章：<a href="http://www.songho.ca/opengl/gl_projectionmatrix.html">article</a>。</p>
+<h2 id="深度缓冲可视化">深度缓冲可视化</h2>
+<p>  我们知道片元着色器的gl_FragCoord的z值保存着片段的深度值，接下来我们将这个深度值作为颜色输出来直观地感受:</p>
+<pre><code class="language-GLSL">void main()
+{             
+    FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
+}  
+</code></pre>
+<p>  如果这样运行程序我们会发现几乎整个场景都是白色的。这是因为在屏幕空间中，深度值是非线性变化的，在z值较小时精度高，在z值较大时精度低，所以深度值会因为距离的变化而快速地变为接近1.0的值。当然，如果我们小心靠近物体，就可以看见颜色渐渐变暗：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479513467.png" alt="" loading="lazy"><br>
+  为了更加直观地感受深度，我们将z值转化为线性排布。首先将z值标准化到[-1,1]的范围，接着我们将上面的非线性等式也标准化后，将标准化的z值带入到F中计算线性的z值，最后实现如下：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+
+float near = 0.1; 
+float far  = 100.0; 
+  
+float LinearizeDepth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
+void main()
+{             
+    float depth = LinearizeDepth(gl_FragCoord.z) / far; // 因为值会超过1，我们除以far来将值限制在1以内
+    FragColor = vec4(vec3(depth), 1.0);
+}
+</code></pre>
+<p>  运行结果大致如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479523586.png" alt="" loading="lazy"></p>
+<h2 id="深度冲突">深度冲突</h2>
+<p>  如果两个平面的距离非常近的话，深度缓冲的值的精度可能不足以来判断两个平面的深度值的大小，这样就可能造成画面不停闪烁的效果（两个平面轮流切换位置），这种情况被称为深度冲突。例如，我们将立方体恰好摆放在平面上，在立方体内部观看就会出现类似下面的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479533422.png" alt="" loading="lazy"></p>
+<h3 id="避免深度冲突">避免深度冲突</h3>
+<p>  第一个方法是尽量不要让面重合，微小的偏移可以避免深度冲突的存在。然而，这要求手动移动大量的物体来确保深度冲突完全不会产生。<br>
+  第二个方法是将视锥体的近平面设置的尽可能远。之前说过，在靠近近平面的z缓冲的值的精度非常高，所以这样可以尽量避免深度冲突。但将近平面设置的过远会造成切割效果，只能在较远距离观察场景。<br>
+  还有一种方法是使用更高精度的深度缓冲。之前说过，GPU已经支持32bit的深度缓冲了，使用更高精度的深度缓冲也可以有效避免深度冲突的问题。<br>
+  最后，贴上原文地址供参考：<a href="https://learnopengl.com/Advanced-OpenGL/Depth-testing">https://learnopengl.com/Advanced-OpenGL/Depth-testing</a>。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglmo-xing-dao-ru/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):模型导入
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

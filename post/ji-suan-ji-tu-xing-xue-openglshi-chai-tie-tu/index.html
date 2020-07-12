@@ -1,0 +1,378 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):视差贴图 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):视差贴图
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-14 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>  视差贴图是一种和法线贴图类似的技术，但基于不同的原则。同样也是通过视觉上的一些操作来让人产生有纵深的感觉，视差贴图效果更好。<br>
+  视差贴图和置换贴图的技术有很大的关系，置换贴图技术通过一张存储几何信息的纹理来置换或偏移顶点。其中一种纹理存储的是高度信息，这张纹理被称为高度图，下面是一个砖块图的高度图例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483118694.png" alt="" loading="lazy"><br>
+  当操作一个平面时，每个顶点将根据高度图中的采样高度值进行置换，将一个很平坦的平面转化为有一个有凹凸信息的平面。下面时一个使用了高度图置换的例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483134039.png" alt="" loading="lazy"><br>
+  但通过这种方式置换的问题是一个平面需要包含大量的三角形来获取更为真实的置换结果，否则就会得到块状感的结果。正是因为一个平坦的平面可能需要超过10000个顶点来进行置换，所以会造成极大的开销。但如果我们可以不使用额外顶点来实现相似的结果呢？实际上，我们只需要两个三角形就可以实现上面的效果，而这种技术就是视差贴图。<br>
+  视差贴图的原理是通过某种方式转化纹理坐标，让片段的平面看起来比实际的高或低，这些都基于视线防线和一张高度图。下面的图解释了这个原理：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483144954.png" alt="" loading="lazy"><br>
+  这里的红线代表高度图中的几何平面信息，v向量代表我们的视线方向，如果一个平坦平面上的一个点有置换的话，那么对于A点我们应该看到的是B点。视差贴图的目的就是偏移A点的纹理坐标，以得到B点的纹理坐标，接着我们使用B点的纹理坐标来进行纹理采样，让观察者感觉再看B点。<br>
+  技巧在于如何从A点获取B点的纹理坐标。视差贴图通过将向量V的长度缩放到H(A)来获得P向量：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483156719.png" alt="" loading="lazy"><br>
+  我们接着使用这个向量P，并将这个向量的与平面相对应的两个坐标作为纹理坐标偏移。因为P向量是由高度图中的高度值计算的，所以这样片段的高度越高，置换的程度越大。<br>
+  使用这个技术大多数情况都有用，但有时候会有一些问题。当高度迅速变化时，P向量对应的点可能和应该在的B点差距很大：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483168046.png" alt="" loading="lazy"><br>
+  另一个问题是，当面通过某种方式旋转时，从向量P获取坐标会变得很困难。所以我们可以使用法线贴图中提到过的切线空间来完成上述的操作。<br>
+  将视线向量V转换到切线空间，这样P向量的x、y坐标就与平面的切线和双切线向量在同一个轴上。正因为在切线空间，切线和双切线向量的方向和纹理坐标的方向一致，这样，我们就可以将P向量的x、y坐标作为纹理坐标偏移，的旋转，不用去考虑平面。</p>
+<h1 id="视差贴图">视差贴图</h1>
+<p>  这里使用的高度图是上面提到的高度图的反相，这样就会产生一些差别：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483183386.png" alt="" loading="lazy"><br>
+  同样，我们有平面的一个片段点A，对应的深度是H(A),同时也有一个我们希望看到的点B。这一次，我们将V反向缩放来获得P向量。我们可以用1减去高度图中的高度值来获取片段的深度值，或者将高度图反相来获得相同的结果。<br>
+  视差贴图在片元着色器中实现，我们需要计算片段到观察者的方向向量，所以我们需要切线空间的观察者位置和片段位置。顶点着色器如下：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoords;
+layout (location = 3) in vec3 aTangent;
+layout (location = 4) in vec3 aBitangent;
+
+out VS_OUT {
+    vec3 FragPos;
+    vec2 TexCoords;
+    vec3 TangentLightPos;
+    vec3 TangentViewPos;
+    vec3 TangentFragPos;
+} vs_out;
+
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
+uniform vec3 lightPos;
+uniform vec3 viewPos;
+
+void main()
+{
+    gl_Position      = projection * view * model * vec4(aPos, 1.0);
+    vs_out.FragPos   = vec3(model * vec4(aPos, 1.0));   
+    vs_out.TexCoords = aTexCoords;    
+    
+    vec3 T   = normalize(mat3(model) * aTangent);
+    vec3 B   = normalize(mat3(model) * aBitangent);
+    vec3 N   = normalize(mat3(model) * aNormal);
+    mat3 TBN = transpose(mat3(T, B, N));
+
+    vs_out.TangentLightPos = TBN * lightPos;
+    vs_out.TangentViewPos  = TBN * viewPos;
+    vs_out.TangentFragPos  = TBN * vs_out.FragPos;
+}   
+</code></pre>
+<p>  片元着色器如下：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+
+in VS_OUT {
+    vec3 FragPos;
+    vec2 TexCoords;
+    vec3 TangentLightPos;
+    vec3 TangentViewPos;
+    vec3 TangentFragPos;
+} fs_in;
+
+uniform sampler2D diffuseMap;
+uniform sampler2D normalMap;
+uniform sampler2D depthMap;
+  
+uniform float height_scale;
+  
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
+  
+void main()
+{           
+    // offset texture coordinates with Parallax Mapping
+    vec3 viewDir   = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
+    vec2 texCoords = ParallaxMapping(fs_in.TexCoords,  viewDir);
+
+    // then sample textures with new texture coords
+    vec3 diffuse = texture(diffuseMap, texCoords);
+    vec3 normal  = texture(normalMap, texCoords);
+    normal = normalize(normal * 2.0 - 1.0);
+    // proceed with lighting code
+    [...]    
+}
+</code></pre>
+<p>  我们定义了一个ParallaxMapping来计算偏移后的纹理坐标，输入纹理坐标和视线方向。生成置换后的纹理坐标后，我们将其用来采样漫反射纹理和法线贴图。<br>
+  ParallaxMapping方法实现如下：</p>
+<pre><code class="language-GLSL">vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{ 
+    float height =  texture(depthMap, texCoords).r;    
+    vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
+    return texCoords - p;    
+} 
+</code></pre>
+<p>  注意这个方法中的viewDir.xy/viewDir.z，viewDir本身是标准化坐标，viewDir.z的范围就是[0,1]。如果视线很靠近平面，那么viewDir.z的值就会接近0，这样的话纹理坐标偏移量就会很大，反之，就很比较正常。我们通过这种方式可以让置换更加自然。<br>
+  下面是height_scale置为0.1的视差贴图结果和法线贴图的对比：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483199502.png" alt="" loading="lazy"><br>
+  我们可以看出区别，因为视差贴图尝试模拟深度感，所以在某些方向会有些许的重叠。<br>
+  同时，视差贴图的边缘很奇怪，这是因为边缘的纹理坐标采样的值会超出[0,1]的范围，一种解决这一问题的方式是如果采样纹理坐标超出范围，我们就丢弃这些片段：</p>
+<pre><code class="language-GLSL">texCoords = ParallaxMapping(fs_in.TexCoords,  viewDir);
+if(texCoords.x &gt; 1.0 || texCoords.y &gt; 1.0 || texCoords.x &lt; 0.0 || texCoords.y &lt; 0.0)
+    discard;
+</code></pre>
+<p>  这样的话，就可以得到不错的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483214061.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/5.1.parallax_mapping/parallax_mapping.cpp">Code</a>。<br>
+  这看起来效果不错，但如果在某些特定的角度会发现平面感很强(法线贴图也会存在这种问题)：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483227317.png" alt="" loading="lazy"><br>
+  我们可以进行多次采样才解决这一问题。</p>
+<h2 id="陡峭视差贴图">陡峭视差贴图</h2>
+<p>  陡峭视差贴图进行多次采样来得到最佳的P向量以吻合我们想要的B点。主要的做法是将深度值或高度值分为许多不同的层级，对每个层级我们都进行深度图的采样，沿着P向量方向平移纹理坐标，直到采样的深度值比当前层级的深度值小，下图是一个示例：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483237844.png" alt="" loading="lazy"><br>
+  我们从上到下切换深度层，对每个层我们将它的深度值和当前存储在深度图中的深度值比较。如果层的深度值小于深度图中的值，就表明这个层的P向量不在表面下面。我们持续这个过程直到层的深度值高于采样的深度值，这样的话，P向量就在表面下面了。<br>
+  我们修改ParallaxMapping方法来实现我们的想法：</p>
+<pre><code class="language-GLSL">vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{ 
+    // number of depth layers
+    const float numLayers = 10;
+    // calculate the size of each layer
+    float layerDepth = 1.0 / numLayers;
+    // depth of current layer
+    float currentLayerDepth = 0.0;
+    // the amount to shift the texture coordinates per layer (from vector P)
+    vec2 P = viewDir.xy * height_scale; 
+    vec2 deltaTexCoords = P / numLayers;
+  
+    [...]     
+}   
+</code></pre>
+<p>  我们首先定义10个层，并设置每个层的高度，接着计算每层平移纹理坐标的量。<br>
+  接着我们遍历所有的层，直到深度图的值小于某一层的深度值：</p>
+<pre><code class="language-GLSL">// get initial values
+vec2  currentTexCoords     = texCoords;
+float currentDepthMapValue = texture(depthMap, currentTexCoords).r;
+  
+while(currentLayerDepth &lt; currentDepthMapValue)
+{
+    // shift texture coordinates along direction of P
+    currentTexCoords -= deltaTexCoords;
+    // get depthmap value at current texture coordinates
+    currentDepthMapValue = texture(depthMap, currentTexCoords).r;  
+    // get depth of next layer
+    currentLayerDepth += layerDepth;  
+}
+
+return currentTexCoords;
+</code></pre>
+<p>  最后得到的currentTexCoords就是我们要减去的偏移量。<br>
+  通过这10次的采样，我们可以得到比较好的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483251752.png" alt="" loading="lazy"><br>
+  我们可以利用一个视差贴图的属性来改进算法。直视平面并不会的带太大的置换，通过某些角度观察置换的程度会比较大，所以，某些角度我们减少采样数，某些角度我们增大采样数：</p>
+<pre><code class="language-GLSL">const float minLayers = 8.0;
+const float maxLayers = 32.0;
+float numLayers = mix(maxLayers, minLayers, max(dot(vec3(0.0, 0.0, 1.0), viewDir), 0.0));  
+</code></pre>
+<p>  这里我们使用视线方向和+z轴方向的点乘来代表观察角度，这个值越小表明观察的角度越倾斜，通过这个角度来获取最小采样值和最大采样值之间的值。<br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/5.2.steep_parallax_mapping/steep_parallax_mapping.cpp">Code</a>。<br>
+  但还是有一个问题，因为我们使用的是有限的采样数，当观察的角度很倾斜时，我们会得到这种结果（层间的区别被放大）：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483262102.png" alt="" loading="lazy"><br>
+  解决这一问题的方法有两种：浮雕视差贴图和视差遮蔽贴图。浮雕视差贴图效果很好，但相比视差遮蔽贴图，开销大了些，这里介绍视差遮蔽贴图。</p>
+<h2 id="视差遮蔽贴图">视差遮蔽贴图</h2>
+<p>  视差遮蔽贴图和陡峭视差贴图基于的原则一样，但不使用迭代结束后的目标深度层的纹理坐标，而是使用迭代结束前后的深度层进行线性插值计算。下面是图例：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483274554.png" alt="" loading="lazy"><br>
+  可以看到，我们将T3和T2的插值作为目标点。视差遮蔽贴图的代码只需要在陡峭视差贴图的基础上进行一些修改：</p>
+<pre><code class="language-GLSL">[...] // 陡峭视差贴图代码
+  
+// 迭代结束前一层的纹理坐标
+vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+// 迭代结束前后对应的深度值
+float afterDepth  = currentDepthMapValue - currentLayerDepth;
+float beforeDepth = texture(depthMap, prevTexCoords).r - currentLayerDepth + layerDepth;
+ 
+//插值计算纹理坐标
+float weight = afterDepth / (afterDepth - beforeDepth);
+vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+return finalTexCoords;  
+</code></pre>
+<p>  视差遮蔽贴图的效果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594483284338.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/5.3.parallax_occlusion_mapping/parallax_occlusion_mapping.cpp">Code</a>。<br>
+  值得注意的是，视差贴图往往用在那些不怎么容易辨别轮廓的物体上，如地板、墙面。<br>
+  最后，给出原文地址供参考：<a href="https://learnopengl.com/Advanced-Lighting/Parallax-Mapping">https://learnopengl.com/Advanced-Lighting/Parallax-Mapping</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglfa-xian-tie-tu/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):法线贴图
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

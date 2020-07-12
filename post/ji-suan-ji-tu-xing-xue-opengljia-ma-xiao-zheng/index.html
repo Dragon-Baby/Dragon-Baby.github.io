@@ -1,0 +1,250 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):伽马校正 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):伽马校正
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-12 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>  当我们计算好场景中的每个像素的颜色后我们需要将其显示在显示器上。在过去我们往往使用CRT显示器，这种显示器由于某些物理属性，增加电压的倍数并不会增加同种倍数的亮度。两倍的输入电压会造成2.2倍的亮度提升，这个2.2的数值被粗略的称为显示器的伽马值。这个数值也恰好和人类感知的亮度相关。下面给出物理线性亮度变化和人类察觉的线性亮度变化：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481951015.png" alt="" loading="lazy"><br>
+  上一行的人类感知线性亮度更像是我们眼睛看到的亮度变化。然而当我们考虑物理亮度数值(光子层面)时，下一行反而是正确的亮度变化。所以就会造成很奇怪的感知现象，真实的和我们看见的是不一样的(我们更容易察觉亮度不是很高的变化)。<br>
+  正是由于人的眼睛像上面那一行一样感知亮度，所以显示器使用一个幂运算来增加输入的物理亮度来非线性映射到上一行那样的亮度变化。<br>
+  这个非线性映射的确可以输出让我们眼睛更舒服的亮度，但对于渲染层面就有一个问题：所有的颜色和亮度选项我们需要使用我们从显示器感知的来配置，因此所有的配置是非线性配置。看下面的图表：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481959176.png" alt="" loading="lazy"><br>
+  中间的点线代表线性空间的的颜色变化，实线代表显示器的颜色空间。如果我们在线性空间将颜色值增加两倍，结果就一是两倍。例如，一个颜色向量(0.5, 0.0, 0.0)，2倍后就是(1.0, 0.0, 0.0)。但问题在于，原颜色向量在显示器上为(0.218, 0.0, 0.0)，如果就这么在线性空间增加两倍，在显示器上相当于增加了4、5倍亮度。<br>
+  到目前的章节为止，我们都是在假设我们在线性空间操作颜色，但实际上我们是在显示器的输出空间来操作颜色，所以我们配置的颜色在物理层面并不准确，只是在显示器上看起来正确（我们眼睛观察的）。针对这个理由，我们一般会将颜色设置的比它本应有的亮度高一些（显示器会降低亮度显示），这样会让大多数线性空间的计算不正确。注意上面的图表，CRT和线性空间的曲线从同一点出发并在同一位置结束，在这中间的值会降低亮度显示。<br>
+  因为颜色是基于显示的输出配置的，所有的在线性空间的中间值在物理层面上都是不正确的。下面的图片显示了这种区别：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481967915.png" alt="" loading="lazy"><br>
+  可以看到如果使用了伽马矫正，颜色显示的非常好，在亮度角度处会有比较丰富的细节。如果没有伽马校正，为了获得比较正确的亮度显示，会浪费许多时间在颜色调整上。</p>
+<h1 id="伽马校正">伽马校正</h1>
+<p>  说白了，伽马校正就是对线性空间的颜色值进行反向伽马值的幂运算，到时候在显示器上进行显示时，显示器会对进行伽马矫正过的颜色值进行针对自己伽马值的幂运算，这样的话，我们只需要在线性空间调整颜色即可，在显示器上显示的颜色也在线性空间。<br>
+  下面给出一个例子。我们有一个深红色的颜色<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mn>0.5</mn><mo separator="true">,</mo><mn>0.0</mn><mo separator="true">,</mo><mn>0.0</mn><mo>)</mo></mrow><annotation encoding="application/x-tex">(0.5, 0.0, 0.0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mord">.</span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mclose">)</span></span></span></span>，我们首先进行伽马校正，颜色为<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mrow><mo>(</mo><mn>0.5</mn><mo separator="true">,</mo><mn>0.0</mn><mo separator="true">,</mo><mn>0.0</mn><mo>)</mo></mrow><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>2.2</mn></mrow></msup><mo>=</mo><msup><mrow><mo>(</mo><mn>0.5</mn><mo separator="true">,</mo><mn>0.0</mn><mo separator="true">,</mo><mn>0.0</mn><mo>)</mo></mrow><mn>0.45</mn></msup><mo>=</mo><mo>(</mo><mn>0.73</mn><mo separator="true">,</mo><mn>0.0</mn><mo separator="true">,</mo><mn>0.0</mn><mo>)</mo></mrow><annotation encoding="application/x-tex">{(0.5, 0.0, 0.0)}^{1/2.2} = {(0.5, 0.0, 0.0)}^{0.45} = (0.73, 0.0, 0.0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2779em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord"><span class="mopen">(</span><span class="mord">0</span><span class="mord">.</span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mclose">)</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:1.0279em;"><span style="top:-3.2029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">/</span><span class="mord mtight">2</span><span class="mord mtight">.</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.204008em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord"><span class="mopen">(</span><span class="mord">0</span><span class="mord">.</span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mclose">)</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.954008em;"><span style="top:-3.2029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0</span><span class="mord mtight">.</span><span class="mord mtight">4</span><span class="mord mtight">5</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mord">.</span><span class="mord">7</span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mclose">)</span></span></span></span>，最后显示在显示器上会再进行一次幂运算，颜色为<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mrow><mo>(</mo><mn>0.73</mn><mo separator="true">,</mo><mn>0.0</mn><mo separator="true">,</mo><mn>0.0</mn><mo>)</mo></mrow><mn>2.2</mn></msup><mo>=</mo><mo>(</mo><mn>0.5</mn><mo separator="true">,</mo><mn>0.0</mn><mo separator="true">,</mo><mn>0.0</mn><mo>)</mo></mrow><annotation encoding="application/x-tex">{(0.73, 0.0, 0.0)}^{2.2} = (0.5, 0.0, 0.0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.204008em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord"><span class="mopen">(</span><span class="mord">0</span><span class="mord">.</span><span class="mord">7</span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mclose">)</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.954008em;"><span style="top:-3.2029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="mord mtight">.</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mord">.</span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mclose">)</span></span></span></span>，可以看到使用了伽马校正，最终显示的颜色和我们在线性空间设置的一样。<br>
+  注意：2.2是大多是显示器的平均估计伽马值，通过进行此伽马值的幂运算得到的颜色空间被称为sRGB颜色空间(不完全是，但很接近)。每个显示器都有自己的伽马值，但2.2适用于大多数显示器，并可以得到很好的效果。<br>
+  在OpenGL中有两种方式使用伽马校正：</p>
+<ul>
+<li>使用OpenGL的sRGB帧缓冲。</li>
+<li>在片元着色器中进行手动伽马校正。<br>
+  第一种方法可能最简单，但可控性更低。通过开启GL_FRAMEBUFFER_SRGB我们告知OpenGL在每个绘制命令在存储颜色进颜色缓冲前先进行伽马校正。sRGB是和2.2伽马值相关的颜色空间，对大多数设备都适用。在开启GL_FRAMEBUFFER_SRGB后，OpenGL会在片元着色器执行后对片元的自动进行伽马校正，包括所有帧缓冲。<br>
+  这么开启GL_FRAMEBUFFER_SRGB:</li>
+</ul>
+<pre><code class="language-cpp">glEnable(GL_FRAMEBUFFER_SRGB); 
+</code></pre>
+<p>  使用这个命令我们需要记住，伽马校正会将线性空间的颜色转化到非线性空间，所以我们一定要在最后阶段进行伽马校正，以免影响其它重要的操作。<br>
+  第二个方法如下，我们在片元着色器的输出颜色的最后使用伽马校正：</p>
+<pre><code class="language-GLSL">void main()
+{
+    // 在线性空间进行的操作
+    [...]
+    // 使用伽马矫正
+    float gamma = 2.2;
+    FragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
+}
+</code></pre>
+<p>  这一方法的问题在于我们需要对所有相关的片元着色器使用相同的操作。操作可能过于繁琐，但我们可以使用帧缓冲绘制一个屏幕大小的平面来进行后期处理，这样我们只需要在一个片元着色器中进行伽马校正。</p>
+<h1 id="srgb纹理">sRGB纹理</h1>
+<p>  在我们绘制纹理，图片时，我们会根据自己在屏幕上看到的颜色来选择颜色，这也就表示我们绘制的图片的颜色处在非线性空间即sRGB空间。<br>
+  所以说，我们在使用这些纹理时我们也需要将纹理处在sRGB空间的问题考虑在内。同样，由于我们是在线性空间进行渲染相关计算，我们可能会想去进行伽马校正，但同样会造成视觉上的问题：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481988921.png" alt="" loading="lazy"><br>
+  可以看到，使用了伽马矫正的话，纹理太亮了，这是因为它其实进行了两次伽马校正。当我们创建纹理时，我们基于我们在显示器上看到的颜色创建，我们会对这张纹理进行伽马校正来保证在显示器上会看起来不错，接着我们又在渲染时进行了伽马校正，这样就会导致图片看起来太亮了。<br>
+  为了解决这一问题，我们需要保证我们是在线性空间创建纹理。然而，在sRGB空间创建纹理更为容易，而且大多数工具并不支持线性空间的纹理，所以，这不是一个好办法。<br>
+  另一个方法是在片元着色器中进行。我们在进行颜色计算前先手动将sRGB纹理转化到线性空间：</p>
+<pre><code class="language-GLSL">float gamma = 2.2;
+vec3 diffuseColor = pow(texture(diffuse, texCoords).rgb, vec3(gamma));
+</code></pre>
+<p>  如果针对每次纹理计算都这么做，可是不小的工作量。幸运地是，OpenGL提供了另一种方式，GL_SRGB和GL_SRGB_ALPHA纹理格式。<br>
+  如果我们在创建纹理时将纹理格式设置为GL_SRGB，那么OpenGL会自动将颜色转化为线性空间：</p>
+<pre><code class="language-cpp">glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);  
+</code></pre>
+<p>  我们需要注意的是并不是所有的纹理都在sRGB空间，用于计算颜色的纹理（像漫反射纹理）大多数都在sRGB空间，用于检索灯光参数的纹理（如高光纹理和法线纹理）大多数在线性空间。</p>
+<h1 id="衰减">衰减</h1>
+<p>  之前讲过，光的衰减根据距离可以有平方衰减：</p>
+<pre><code class="language-GLSL">float attenuation = 1.0 / (distance * distance);
+</code></pre>
+<p>  以及线性衰减：</p>
+<pre><code class="language-GLSL">float attenuation = 1.0 / distance; 
+</code></pre>
+<p>  我们对上面两种衰减使用伽马校正来进行对比：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482003311.png" alt="" loading="lazy"><br>
+  这种差异的原因时灯光衰减会改变亮度，由于我们不使用线性空间观察场景，我们会使用在显示器上观看的更好的方式来衰减，但这在物理层面并不正确。对于我们的平方衰减，如果我们不使用伽马矫正，那么公式就会变成这样：<img src="https://dragon-baby.github.io/post-images/1594482015507.png" alt="" loading="lazy"><br>
+，这样的话在显示器上衰减的程度就太大了，线性衰减也是一样的。<br>
+  伽马矫正允许我们在线性空间进行光照计算，因为在线性空间计算的值在物理层面更为正确，大多数物理等式也能给出很棒的结果。使用的光照越复杂，使用伽马校正就可以得到更真实的结果。<br>
+  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-Lighting/Gamma-Correction">https://learnopengl.com/Advanced-Lighting/Gamma-Correction</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglgao-ji-guang-zhao/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):高级光照
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):点阴影 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):点阴影
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-14 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="点阴影">点阴影</h1>
+<p>  上一章我们使用阴影贴图创建了动态阴影，但我们使用的方式只适合方向光源。这里我们将讨论全方位阴影的创建方式，即适用于点光源的阴影，也可以称为全方位阴影贴图。<br>
+  这一技术和单方向阴影贴图很相似：我们从灯光的视角生成深度贴图，根据当前片段的位置采样深度贴图，并比较当前片段深度和存储在深度贴图中的深度来判断当前片段是否在阴影中。而单方位和全方位的区别在于我们使用的深度贴图不一样。<br>
+  如果要针对点光源渲染一张深度贴图，简单的一张2D贴图不会起作用，还记得立方体贴图吗？包含6个不同方位的纹理的立方体贴图可以很好的解决这一问题。<br>
+<img src="https://dragon-baby.github.io/post-images/1594482544219.png" alt="" loading="lazy"><br>
+  生成的深度立方体贴图接着送往片元着色器，通过一个方向向量采样立方体贴图来获取最近深度点。</p>
+<h2 id="生成深度立方体贴图">生成深度立方体贴图</h2>
+<p>  为了创建一个深度立方体贴图，我们需要渲染场景6次。其中一种方法时通过6个不同的view矩阵渲染场景6次，每次都将附加不同的立方体贴图面到帧缓冲上，大致如下：</p>
+<pre><code class="language-cpp">for(unsigned int i = 0; i &lt; 6; i++)
+{
+    GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, face, depthCubemap, 0);
+    BindViewMatrix(lightViewMatrices[i]);
+    RenderScene();  
+}
+</code></pre>
+<p>  但这种方式开销很大，我们会使用一种替代的方法来建立深度立方体贴图，我们可以可以在几何着色器中使用一点技巧来保证只用渲染一次。<br>
+  首先，创建一个立方体贴图对象：</p>
+<pre><code class="language-cpp">unsigned int depthCubemap;
+glGenTextures(1, &amp;depthCubemap);
+</code></pre>
+<p>  接着为立方体贴图的每个面生成一张深度纹理:</p>
+<pre><code class="language-cpp">const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+for(unsigned int i = 0; i &lt; 6; i++)
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, 
+                  SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+</code></pre>
+<p>  接着设置纹理的映射方式和滤镜：</p>
+<pre><code class="language-cpp">glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
+</code></pre>
+<p>  我们将立方体贴图作为1个附加项附加到自定义的帧缓冲上：</p>
+<pre><code class="language-cpp">glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+glDrawBuffer(GL_NONE);
+glReadBuffer(GL_NONE);
+glBindFramebuffer(GL_FRAMEBUFFER,0);
+</code></pre>
+<p>  注意我们要使用glDrawBuffer和glReadBuffer来保证不写入和使用颜色缓冲。<br>
+  渲染全方位阴影贴图有两个步骤，一是先渲染出深度图，二是使用深度图渲染正常场景，这和但方位阴影贴图没区别：</p>
+<pre><code class="language-cpp">// 1. first render to depth cubemap
+glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    ConfigureShaderAndMatrices();
+    RenderScene();
+glBindFramebuffer(GL_FRAMEBUFFER, 0);
+// 2. then render scene as normal with shadow mapping (using depth cubemap)
+glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ConfigureShaderAndMatrices();
+glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+RenderScene();
+</code></pre>
+<h2 id="灯光空间转换">灯光空间转换</h2>
+<p>  为了渲染深度图，我们需要将所有的场景的几何体转化到6个不同的灯光空间中。每个灯光空间的转换矩阵包含一个投影矩阵和一个视图矩阵。针对投影矩阵我们使用一个透视投影矩阵：</p>
+<pre><code class="language-cpp">float aspect = (float)SHADOW_WIDTH/(float)SHADOW_HEIGHT;
+float near = 1.0f;
+float far = 25.0f;
+glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspect, near, far); 
+</code></pre>
+<p>  注意我们将透视角设为了90度，这样可以保证覆盖范围足够大，以保证立方体贴图的每个面都在投影范围内。<br>
+  接着我们需要创建6个不同的view矩阵，我们使用glm::lookAt针对6个不同方位创建：右、左、上、下、前、后。</p>
+<pre><code class="language-cpp">std::vector&lt;glm::mat4&gt; shadowTransforms;
+shadowTransforms.push_back(shadowProj * 
+                 glm::lookAt(lightPos, lightPos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0));
+shadowTransforms.push_back(shadowProj * 
+                 glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0));
+shadowTransforms.push_back(shadowProj * 
+                 glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+shadowTransforms.push_back(shadowProj * 
+                 glm::lookAt(lightPos, lightPos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0));
+shadowTransforms.push_back(shadowProj * 
+                 glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0));
+shadowTransforms.push_back(shadowProj * 
+                 glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0));
+</code></pre>
+<h2 id="着色器">着色器</h2>
+<p>  这次我们要创建3个着色器来渲染深度图，顶点、几何和片元。<br>
+  几何着色器的任务是将所有世界空间的顶点转化到6个不同的灯光空间，因此，我们只需要在顶点着色器中将顶点转化到世界空间即可：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 model;
+
+void main()
+{
+    gl_Position = model * vec4(aPos, 1.0);
+}  
+</code></pre>
+<p>  几何着色器将每个三角形的三个顶点作为输入，并定义一个包含6个灯光空间变换矩阵的数组。<br>
+  几何着色器中的内建变量gl_Layer可以用来判断渲染立方体贴图的哪一个面：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (triangles) in;
+layout (triangle_strip, max_vertices=18) out;
+
+uniform mat4 shadowMatrices[6];
+
+out vec4 FragPos; 
+
+void main()
+{
+    for(int face = 0; face &lt; 6; ++face)
+    {
+        gl_Layer = face; // 内建变量，用来判断渲染哪一个面
+        for(int i = 0; i &lt; 3; ++i) // 对每个三角形顶点
+        {
+            FragPos = gl_in[i].gl_Position;
+            gl_Position = shadowMatrices[face] * FragPos;
+            EmitVertex();
+        }    
+        EndPrimitive();
+    }
+}
+</code></pre>
+<p>  这个几何着色器中，我们输入一个三角形，并在这个三角形的举出上输出6个三角形。在main方法中，我们遍历立方体贴图的6个面，并将每个面的序号存储在gl_Layer中。接着我们将每个三角形变换到立方体贴图6个面对应的灯光空间中，FragPos代表每个顶点的位置，并将这个变量与变换矩阵相乘得到灯光空间的位置。我们也将这个FragPos传入片元着色器来计算深度值。<br>
+  最后，在片元着色器中，我们这样做：</p>
+<pre><code class="language-GLSL">#version 330 core
+in vec4 FragPos;
+
+uniform vec3 lightPos;
+uniform float far_plane;
+
+void main()
+{
+    // 获取片段和光源位置的距离
+    float lightDistance = length(FragPos.xyz - lightPos);
+    
+    // 通过和远平面的值相乘将距离映射到[0, 1]之间
+    lightDistance = lightDistance / far_plane;
+    
+    // 将这一距离作为当前片段的深度值。
+    gl_FragDepth = lightDistance;
+}  
+</code></pre>
+<p>  这个片元着色器将几何着色器计算的的FragPos作为输入，同时uniform定义灯光位置和远平面。我们获取灯光和片段之间的距离，并将这个距离映射到[0,1]作为片段从某一面的光源方向观察的深度值。</p>
+<h2 id="全方位深度贴图">全方位深度贴图</h2>
+<p>  做好这些准备后，我们开始渲染这张深度立方体贴图。过程和单方向深度贴图很相似，只是要将绑定的纹理类型换成立方体贴图：</p>
+<pre><code class="language-cpp">glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+shader.use();  
+// ... send uniforms to shader (including light's far_plane value)
+glActiveTexture(GL_TEXTURE0);
+glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+// ... bind other textures
+RenderScene();
+</code></pre>
+<p>  接下来使用渲染好的深度图渲染我们的带阴影的场景。顶点着色器和片元着色器没有太大的改变，只是在片元着色器中我们不需要使用灯光空间的片段位置了，我们通过一个方向向量来采样深度值。<br>
+  在顶点着色器中我们不再需要将顶点转移到灯光空间：</p>
+<pre><code class="language-GLSL">
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoords;
+
+out vec2 TexCoords;
+
+out VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+} vs_out;
+
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
+void main()
+{
+    vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
+    vs_out.Normal = transpose(inverse(mat3(model))) * aNormal;
+    vs_out.TexCoords = aTexCoords;
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+}  
+</code></pre>
+<p>  片元着色器如下：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+
+in VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+} fs_in;
+
+uniform sampler2D diffuseTexture;
+uniform samplerCube depthMap;
+
+uniform vec3 lightPos;
+uniform vec3 viewPos;
+
+uniform float far_plane;
+
+float ShadowCalculation(vec3 fragPos)
+{
+    [...]
+}
+
+void main()
+{           
+    vec3 color = texture(diffuseTexture, fs_in.TexCoords).rgb;
+    vec3 normal = normalize(fs_in.Normal);
+    vec3 lightColor = vec3(0.3);
+    // ambient
+    vec3 ambient = 0.3 * color;
+    // diffuse
+    vec3 lightDir = normalize(lightPos - fs_in.FragPos);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * lightColor;
+    // specular
+    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = 0.0;
+    vec3 halfwayDir = normalize(lightDir + viewDir);  
+    spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
+    vec3 specular = spec * lightColor;    
+    // calculate shadow
+    float shadow = ShadowCalculation(fs_in.FragPos);                      
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;    
+    
+    FragColor = vec4(lighting, 1.0);
+}  
+</code></pre>
+<p>  片元着色器的区别在于我们定义了立方体贴图类型的深度图采样器，同时计算阴影的方法的参数传入当前片段位置，不使用灯光空间位置。<br>
+  在ShadowCalculation中，我们首先检索立方体贴图的深度值，我们像之前存储深度值到深度图中一样操作，当前片段位置减去灯光位置的向量作为采样的方向向量进行深度值采样：</p>
+<pre><code class="language-GLSL">float ShadowCalculation(vec3 fragPos)
+{
+    vec3 fragToLight = fragPos - lightPos; 
+    float closestDepth = texture(depthMap, fragToLight).r;
+}  
+</code></pre>
+<p>  通过方向向量采样立方体贴图的值不需要使用单位向量，所以这样就可以。<br>
+  结果的closestDepth的范围位于[0,1]之间，为了进行比较，我们需要将其的范围扩大到[0, far_plane]：</p>
+<pre><code class="language-GLSL">closestDepth *= far_plane;
+</code></pre>
+<p>  我们直接将当前片段和灯光位置之间的距离作为深度值进行比较：</p>
+<pre><code class="language-GLSL">float currentDepth = length(fragToLight);  
+</code></pre>
+<p>  接着我们就可以比较这两个值来判断当前片段是否在阴影中了，记住使用深度偏移来避免彼得平移的问题出现：</p>
+<pre><code class="language-GLSL">float bias = 0.05; 
+float shadow = currentDepth -  bias &gt; closestDepth ? 1.0 : 0.0; 
+</code></pre>
+<p>  完整的ShadowCalculation方法如下：</p>
+<pre><code class="language-GLSL">float ShadowCalculation(vec3 fragPos)
+{
+    // get vector between fragment position and light position
+    vec3 fragToLight = fragPos - lightPos;
+    // use the light to fragment vector to sample from the depth map    
+    float closestDepth = texture(depthMap, fragToLight).r;
+    // it is currently in linear range between [0,1]. Re-transform back to original value
+    closestDepth *= far_plane;
+    // now get current linear depth as the length between the fragment and light position
+    float currentDepth = length(fragToLight);
+    // now test for shadows
+    float bias = 0.05; 
+    float shadow = currentDepth -  bias &gt; closestDepth ? 1.0 : 0.0;
+
+    return shadow;
+}  
+</code></pre>
+<p>  最后，（这里使用了几个平面来构成室内的模型）运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482577555.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/3.2.1.point_shadows/point_shadows.cpp">Code</a>。</p>
+<h2 id="观察立方体贴图深度缓冲">观察立方体贴图深度缓冲</h2>
+<p>  我们可以使用上面计算的closest值来观察一下深度值的分布：</p>
+<pre><code class="language-GLSL">FragColor = vec4(vec3(closestDepth / far_plane), 1.0);  
+</code></pre>
+<p>  结果会是这样：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482591661.png" alt="" loading="lazy"></p>
+<h2 id="pcf">PCF</h2>
+<p>  还是熟悉的问题，因为分辨率的问题，阴影边缘会有锯齿感，我们同样使用PCF技术来平滑阴影。<br>
+  我们在上面计算阴影值的方法中添加下面的代码，记住我们要增加一个维度来适应立方体贴图：</p>
+<pre><code class="language-GLSL">float shadow  = 0.0;
+float bias    = 0.05; 
+float samples = 4.0;
+float offset  = 0.1;
+for(float x = -offset; x &lt; offset; x += offset / (samples * 0.5))
+{
+    for(float y = -offset; y &lt; offset; y += offset / (samples * 0.5))
+    {
+        for(float z = -offset; z &lt; offset; z += offset / (samples * 0.5))
+        {
+            float closestDepth = texture(depthMap, fragToLight + vec3(x, y, z)).r; 
+            closestDepth *= far_plane;   // Undo mapping [0;1]
+            if(currentDepth - bias &gt; closestDepth)
+                shadow += 1.0;
+        }
+    }
+}
+shadow /= (samples * samples * samples);
+</code></pre>
+<p>  最后结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482604381.png" alt="" loading="lazy"><br>
+  然而，上述的代码中，我们对每一维度都采样了4次，总共就是64次，太多了！<br>
+  这些采样中大多数都是多余的，它们的采样向量很靠近原来的方向向量，然而只有与原来的方向向量垂直才能发挥更大的作用。然而，识别出哪些方向向量是多余的会很困难，有一个方法是粗略的给出一系列偏移方向来采样，这些方向完全不在同一方向，下面是20个偏移方向向量：</p>
+<pre><code class="language-GLSL">vec3 sampleOffsetDirections[20] = vec3[]
+(
+   vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
+   vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+   vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+   vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+   vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+);   
+</code></pre>
+<p>  我们可以使用这些向量来更新方法：</p>
+<pre><code class="language-GLSL">float shadow = 0.0;
+float bias   = 0.15;
+int samples  = 20;
+float viewDistance = length(viewPos - fragPos);
+float diskRadius = 0.05;
+for(int i = 0; i &lt; samples; ++i)
+{
+    float closestDepth = texture(depthMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+    closestDepth *= far_plane;   // Undo mapping [0;1]
+    if(currentDepth - bias &gt; closestDepth)
+        shadow += 1.0;
+}
+shadow /= float(samples);  
+</code></pre>
+<p>  我们使用diskRadius来缩放这些偏移，环绕着原来的fragToLight进行采样。<br>
+  另一个技巧是我们可以基于观察者到片段的距离改变diskRadius，让阴影在远处更柔和，在近处更尖锐：</p>
+<pre><code class="language-GLSL">float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0; 
+</code></pre>
+<p>  结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482626530.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考:<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/3.2.2.point_shadows_soft/point_shadows_soft.cpp">Code</a>。<br>
+  需要注意的是，我们这里使用几何着色器来帮助渲染立方体深度贴图的方式并不一定是最好的，这需要针对实际情况而定，有时候反而是单独渲染立方体贴图的每个面更好，所以说如果对性能有很大的要求，可以测试这两种方式再进行选择。<br>
+  最后，贴图原文地址供参考：<a href="https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows">https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows</a>。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglyin-ying-tie-tu/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):阴影贴图
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

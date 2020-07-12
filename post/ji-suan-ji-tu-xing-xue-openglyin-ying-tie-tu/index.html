@@ -1,0 +1,522 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):阴影贴图 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):阴影贴图
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-13 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>  阴影是遮蔽光的结果。当某一物体不被光线照射到时，是因为有某种遮挡关系，这样物体就在阴影中。阴影可以让光照场景更为真实，同时也可以梳理物体间的空间关系。下面两图是一个对比：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482103116.png" alt="" loading="lazy"><br>
+  阴影的实现是需要一点技巧的，尤其是在实时渲染领域，一个完美的阴影算法并没有研发出来。有几种比较合适的技术去实现阴影，但或多或少都有一些问题要考虑在内。<br>
+  一种大多数电子游戏都是用的技术是阴影贴图技术。<br>
+  阴影贴图的原理很简单：我们通过光源点的视角去渲染物体，那么所有在这个视角内的物体就都是被光所照到的，看不见的物体都在阴影内。下面是一个例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482120805.png" alt="" loading="lazy"><br>
+  上图的蓝线代表在光源的视角可以看见的片段，在阴影中的片段由黑线表示。我们从光源出发绘制一条线，它会首先触碰到悬空的盒子，接着才会触碰到最右边的盒子，结果就是悬空盒子的片段被光照亮，最右边的盒子的片段在阴影中。<br>
+  我们想得到光线与第一个物体相汇的点，将这个最近点和光线的其他点相比较。接着我们进行测试来看在光线方向测试点的位置是否远于最近点的位置，如果是，那么测试点就一定在阴影中。遍历所有可能的光线不是一个明智之举，我们可以用另一种方式来完成我们的设想，我们使用深度缓冲。<br>
+  从深度测试那一张我们了解到，深度缓冲中的值就是从摄像机视角的片段的深度信息[0,1]，那么如果我们从光源的视角渲染场景并将深度信息存储在一张纹理中的话，我们就可以实现上述的设想了。这个深度值存储的是从光源视角所看到的片段的深度值，我们将所有深度值存储在纹理中，这张纹理被称为阴影贴图。<br>
+<img src="https://dragon-baby.github.io/post-images/1594482143689.png" alt="" loading="lazy"><br>
+  左边的图片显示了一束平行光对一个立方体的阴影结果，我们将所有的最近点对应的片段的深度值存储在纹理中来决定某一片段是否在阴影中。我们通过一点变化来转化到光源的视角，使用view矩阵和投影矩阵进行变换。</p>
+<blockquote>
+<p>  注意，平行光并没有定义位置，但为了计算阴影，我们会定义一个光源方向上的位置。</p>
+</blockquote>
+<p>  右边的图片我们可以看懂光源和观察者。我们渲染了P片段，并需要判断它是否在阴影中，为了这一点，我们首先将P点转化到光源空间中，这里使用T这一变换。现在P点从光源的视角观察，那么这是它的z值就是光源的视角的深度值，这里的例子为0.9。使用点P我们可以得到从光源视角观察的最近点，这里是点C，拥有的深度值为0.4，并将其存储在阴影纹理中。由于阴影纹理中对应的深度值小于P点的深度值，那么我们可以得出结论，P点在阴影中。<br>
+  因此，阴影贴图的实现包含两个步骤：我们首先渲染阴影贴图，接着我们照常渲染场景，接着使用生成的阴影贴图去计算片段是否在阴影中。</p>
+<h1 id="阴影贴图">阴影贴图</h1>
+<p>  第一步就是生成阴影贴图（或者深度贴图）。阴影贴图是从光源视角渲染的深度纹理，因为需要将渲染结果存储在纹理中，这里我们就需要使用帧缓冲。<br>
+  首先我们创建一个FBO：</p>
+<pre><code class="language-cpp">unsigned int depthMapFBO;
+glGenFramebuffers(1, &amp;depthMapFBO); 
+</code></pre>
+<p>  接下来创建一个纹理作为附加项，用来存储深度值：</p>
+<pre><code class="language-cpp">const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
+unsigned int depthMap;
+glGenTextures(1, &amp;depthMap);
+glBindTexture(GL_TEXTURE_2D, depthMap);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
+             SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
+</code></pre>
+<p>  由于我们只关心深度值，所以在创建纹理时我们使用GL_DEPTH_COMPONENT。我们同时将纹理的宽和高设为1024，这代表纹理的分辨率。<br>
+  接下来将纹理附加到帧缓冲上作为深度缓冲：</p>
+<pre><code class="language-cpp">glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+glDrawBuffer(GL_NONE);
+glReadBuffer(GL_NONE);
+glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+</code></pre>
+<p>  作为阴影贴图的纹理只需要深度值，我们不需要颜色值，所以我们将glDrawBuffer和glReadBuffer都关闭。<br>
+  接下来我们填满这张阴影贴图，大致代码如下：</p>
+<pre><code class="language-cpp">// 1. 渲染到阴影贴图
+glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    ConfigureShaderAndMatrices();
+    RenderScene();
+glBindFramebuffer(GL_FRAMEBUFFER, 0);
+// 2. 使用阴影贴图进行正常场景绘制
+glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ConfigureShaderAndMatrices();
+glBindTexture(GL_TEXTURE_2D, depthMap);
+RenderScene();
+</code></pre>
+<p>  记住，我们需要在渲染到阴影贴图时配置glViewport到阴影贴图的分辨率，以免造成贴图大小变化。</p>
+<h1 id="灯光空间转化">灯光空间转化</h1>
+<p>  上述的ConfigureShaderAndMatrices方法并没有实现，我们需要在这其中进行适当的view和projection矩阵的设置，并对每个物体进行相关的model矩阵设置。在第一步中，我们需要使用在灯光空间的矩阵来渲染场景。<br>
+  这里使用的是平行光，所以projection矩阵我们不考虑透视，这里使用正交投影：</p>
+<pre><code class="language-cpp">float near_plane = 1.0f, far_plane = 7.5f;
+glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);  
+</code></pre>
+<p>  我们使用lookAt矩阵来作为灯光空间的视图矩阵：</p>
+<pre><code class="language-cpp">glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), 
+                                  glm::vec3( 0.0f, 0.0f,  0.0f), 
+                                  glm::vec3( 0.0f, 1.0f,  0.0f));  
+</code></pre>
+<p>  将上面的两个矩阵结合起来作为将世界空间的向量转化为灯光空间的矩阵：</p>
+<pre><code class="language-cpp">glm::mat4 lightSpaceMatrix = lightProjection * lightView; 
+</code></pre>
+<p>  这个lightSpaceMatrix矩阵就是我们之前提到的T变换，通过这个矩阵，只要我们为每个着色器配置灯光空间的view和projection矩阵，我们只需要小平常一样渲染场景即可。为了降低性能消耗，我们额外创建一个着色器程序来渲染阴影贴图。</p>
+<h1 id="渲染到阴影贴图">渲染到阴影贴图</h1>
+<p>  当我们从灯光的视角渲染场景时，我们在着色器中要做的仅仅是将顶点转化到灯光空间，下面是顶点着色器：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 lightSpaceMatrix;
+uniform mat4 model;
+
+void main()
+{
+    gl_Position = lightSpaceMatrix * model * vec4(aPos, 1.0);
+}  
+</code></pre>
+<p>  由于我们不需要任何颜色信息，所以我们不再片元着色器中进行任何输出：</p>
+<pre><code class="language-GLSL">#version 330 core
+
+void main()
+{             
+    
+}  
+</code></pre>
+<p>  接着渲染阴影贴图：</p>
+<pre><code class="language-cpp">simpleDepthShader.use();
+glUniformMatrix4fv(lightSpaceMatrixLocation, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    RenderScene(simpleDepthShader);
+glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+</code></pre>
+<p>  我们这里将绘制命令整合再RenderScene方法中了，以免写过多的重复代码。<br>
+  这样我们就将相关的深度信息存储在一张纹理中了，我们可以将纹理作用到一个屏幕平面上进行观察：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482189538.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/3.1.1.shadow_mapping_depth/shadow_mapping_depth.cpp">Code</a>。</p>
+<h1 id="渲染阴影">渲染阴影</h1>
+<p>  在恰当地生成阴影贴图后，我们就可以用来生成阴影了，判断一个片段是否在阴影中我们在片元着色器中实现，顶点着色器中需要进行灯光空间便函：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoords;
+
+out VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+    vec4 FragPosLightSpace;
+} vs_out;
+
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+uniform mat4 lightSpaceMatrix;
+
+void main()
+{    
+    vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
+    vs_out.Normal = transpose(inverse(mat3(model))) * aNormal;
+    vs_out.TexCoords = aTexCoords;
+    vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
+    gl_Position = projection * view * vec4(vs_out.FragPos, 1.0);
+}
+</code></pre>
+<p>  注意到我们增加了一个输出向量FragPosLightSpace，我们对片段的世界空间位置进行向灯光空间的转换（使用lightSpaceMatrix），以便在片元着色器中进行深度比较。<br>
+  这里的片元着色器我们使用之前讲过的Blinn-Phong模型。在片元着色器中我们计算阴影值，1代表片段在阴影中，0代表不在。结果的漫反射和高光组件将于这个阴影值相乘，阴影中的片段会让颜色更暗。</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+
+in VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+    vec4 FragPosLightSpace;
+} fs_in;
+
+uniform sampler2D diffuseTexture;
+uniform sampler2D shadowMap;
+
+uniform vec3 lightPos;
+uniform vec3 viewPos;
+
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    [...]
+}
+
+void main()
+{           
+    vec3 color = texture(diffuseTexture, fs_in.TexCoords).rgb;
+    vec3 normal = normalize(fs_in.Normal);
+    vec3 lightColor = vec3(1.0);
+    // ambient
+    vec3 ambient = 0.15 * color;
+    // diffuse
+    vec3 lightDir = normalize(lightPos - fs_in.FragPos);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * lightColor;
+    // specular
+    vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+    float spec = 0.0;
+    vec3 halfwayDir = normalize(lightDir + viewDir);  
+    spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
+    vec3 specular = spec * lightColor;    
+    // calculate shadow
+    float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;    
+    
+    FragColor = vec4(lighting, 1.0);
+}
+</code></pre>
+<p>  我们声明了一个ShdowCalculation方法来计算阴影。在这个方法中我们为了检查片段是否在阴影中，我们先将灯光空间的片段位置转化到切割空间来标准化坐标。gl_Position中的数据会自动进行透视除法来转化到切割空间的标准化 坐标，但我们定义的FragPosLightSpace并不会，我们需要在方法中手动进行透视除法：</p>
+<pre><code class="language-GLSL">float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    // 进行透视除法
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    [...]
+}
+</code></pre>
+<p>  由于阴影贴图中的深度值范围为[0,1]，而标准化坐标范围为[-1,1]，所以我们需要转化一下范围：</p>
+<pre><code class="language-GLSL">projCoords = projCoords * 0.5 + 0.5; 
+</code></pre>
+<p>  接下来我们就可以通过projCoords来获取对应的最近点的深度值：</p>
+<pre><code class="language-GLSL">float closestDepth = texture(shadowMap, projCoords.xy).r;   
+</code></pre>
+<p>  接着projCooords的z值为当前片段的深度值：</p>
+<pre><code class="language-GLSL">float currentDepth = projCoords.z;  
+</code></pre>
+<p>  我们通过比较两个深度值来对阴影值赋值：</p>
+<pre><code class="language-GLSL">float shadow = currentDepth &gt; closestDepth  ? 1.0 : 0.0;  
+</code></pre>
+<p>  最终的方法如下：</p>
+<pre><code class="language-GLSL">float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    //透视除法
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // 获取最近点深度值
+    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    // 获取当前片段深度值
+    float currentDepth = projCoords.z;
+    // 检查片段是否在阴影中（1是0否）
+    float shadow = currentDepth &gt; closestDepth  ? 1.0 : 0.0;
+
+    return shadow;
+}  
+</code></pre>
+<p>  渲染结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482210628.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/3.1.2.shadow_mapping_base/shadow_mapping_base.cpp">Code</a>。<br>
+  可以看到，很不真实。</p>
+<h1 id="改进阴影贴图">改进阴影贴图</h1>
+<p>  我们的确渲染出阴影了，但会发现许多视觉上的问题。</p>
+<h2 id="阴影座疮">阴影座疮</h2>
+<p>  拉近看会更明显，可以看到非常重的纹理感，也就是阴影痤疮，颗粒感很强：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482227616.png" alt="" loading="lazy"><br>
+  这个问题可以通过下面这张图解释：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482241190.png" alt="" loading="lazy"><br>
+  由于阴影贴图被其分辨率所限制，许多远离光源的片段会从阴影贴图采样到相同的值。上图中翘起的黄色片段代表的是阴影贴图中的同一个值，可以看到，一些片段的确采样了相同的深度值。<br>
+  一般情况下这是OK的，但因为我们的光源从某一角度射向平面，而阴影贴图也是从某一角度渲染生成的。这样的话，一些片段可能会使用相同的翘起的深度纹素，一些在地板平面上面，一些在地板平面下面，这样得到的阴影是与实际不相符的。因此，某些片段会被判断不在阴影中，但它其实本应该在阴影中。<br>
+  我们可以通过阴影偏移来解决这一问题，做法是将平面的深度值远离平面偏移一点，这样所有应该在阴影中的片段都会被考虑在阴影中了：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482258215.png" alt="" loading="lazy"><br>
+  在片元着色器的计算阴影的方法中修改一下：</p>
+<pre><code class="language-GLSL">float bias = 0.005;
+float shadow = currentDepth - bias &gt; closestDepth  ? 1.0 : 0.0;  
+</code></pre>
+<p>  0.005的很大程度地解决了我们的问题，但偏移值其实取决于光源和平面的角度，如果光源很倾斜的话，上面的阴影痤疮问题还是会存在。我们可以居于这个角度来调整偏移的程度：</p>
+<pre><code class="language-GLSL">float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+</code></pre>
+<p>  通过这样的设置，对于与光源方向夹角小的物体会由较小的偏移，大的会有较大的偏移。<br>
+  下面是应用了阴影偏移的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482288255.png" alt="" loading="lazy"></p>
+<h1 id="彼得偏移">彼得偏移</h1>
+<p>  使用阴影偏移的缺点是我们修改了物体原本的深度值，结果就是阴影可能会偏移它本来应该在的位置，下面是我们夸大偏移值的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482310839.png" alt="" loading="lazy"><br>
+  这种现象被称为彼得偏移，我们可以通过一点技巧来解决大多数的彼得偏移问题。我们可以在渲染阴影贴图时使用正面消隐。<br>
+  因为我们只需要在阴影贴图中保存深度值，对固体来说正面背面没有多大区别。如果物体内部没有其它物体的话，使用其背面的深度值是可以的。<br>
+<img src="https://dragon-baby.github.io/post-images/1594482328505.png" alt="" loading="lazy"><br>
+  我们需要在渲染阴影贴图前将面消隐调整为GL_FRONT,结束后调为GL_BACK:</p>
+<pre><code class="language-cpp">glCullFace(GL_FRONT);
+RenderSceneToDepthMap();
+glCullFace(GL_BACK); 
+</code></pre>
+<p>  这样就可以解决偏移带来的影响了。在我们这个场景中，这个方法对立方体很适用，但对地板可能不那么合适了，因为地板就是一个平面，所以会被直接剔除掉。所以我们需要注意对合适的物体使用这种方法。<br>
+  另一个问题是，如果一个物体很靠近绘制阴影的物体的话，结果可能还是不正确，我们可以偏移法线来解决这样的彼得平移问题。</p>
+<h1 id="过采样">过采样</h1>
+<p>  另一个视觉上的问题是，光范围外的区域被考虑为阴影处，但大多数情况这样并不争取。这一问题的原因在于，光范围外的投影坐标的值大于1，这样采样的深度值会超过默认的[0,1]范围，我们通过纹理映射来实现这一不正确的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482341380.png" alt="" loading="lazy"><br>
+  造成这一问题的原因是我们之前将阴影贴图的映射方式设为了GL_REPEAT。<br>
+  我们想要的结果是超出阴影贴图范围的坐标拥有的深度值为1，这样就代表这些片段不会处在阴影中。我们可以将阴影贴图的映射方式调为GL_CLAMP_TO_BORDER，并设置边界范围的值：</p>
+<pre><code class="language-cpp">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);  
+</code></pre>
+<p>  这样，当我们采样阴影贴图范围外的值时，会返回值为1的深度值，不会产生阴影，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482355337.png" alt="" loading="lazy"><br>
+  我们会发现还有一部分区域是黑的，因为这些区域在我们设置的灯光正交投影视锥的远平面之外。<br>
+  当一个灯光空间映射的片段的坐标的z值大于1时，就表明它远离是视锥的远平面。这样的话，GL_CLAMP_TO_BORDER映射方式就不会起作用，因为我们是将坐标的z值与阴影贴图的z值比较，这样的话，这一区域永远都会在阴影中。<br>
+  为解决这一问题骂我们可以手动将这一部分的阴影值调为0来表明这一区域不被阴影影响：</p>
+<pre><code class="language-cpp">float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    [...]
+    if(projCoords.z &gt; 1.0)
+        shadow = 0.0;
+    
+    return shadow;
+}  
+</code></pre>
+<p>  手动调整后的结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482371846.png" alt="" loading="lazy"></p>
+<h1 id="pcf">PCF</h1>
+<p>  现在的阴影看上去不错了，但如果我们拉近镜头会发现阴影的锯齿感很严重：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482382918.png" alt="" loading="lazy"><br>
+  就像之前提到的，由于阴影贴图分辨率的问题，许多片段会采样相同的深度值，最后计算的阴影也是一样的，这样就会造成边缘的锯齿感。<br>
+  我们可以通过增加阴影贴图的分辨率或者调整灯光的视锥来解决这一问题。<br>
+  还有一种做法被称为PCF，百分比近似优化，它是许多滤镜方法的结合，用来获得柔和的阴影。做法是多次采样深度值，每次使用有些许差别的纹理坐标。对每次采样我们判断片段是否在阴影中。所有的结果接着被组合平均，最后会的到比较柔和的阴影。<br>
+  一种简单的实现方法是采样每个纹素周围的纹素来获取平均的深度值：</p>
+<pre><code class="language-GLSL">float shadow = 0.0;
+vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+for(int x = -1; x &lt;= 1; ++x)
+{
+    for(int y = -1; y &lt;= 1; ++y)
+    {
+        float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+        shadow += currentDepth - bias &gt; pcfDepth ? 1.0 : 0.0;        
+    }    
+}
+shadow /= 9.0;
+</code></pre>
+<p>  这里的textureSize返回纹理的宽高，对应的mipmap等级为0.1。取倒数我们获得一个单独纹素的大小，这个大小用来进行纹理坐标的偏移。我们将每个纹素与其8邻接纹素机进行采样平均 。<br>
+  使用更多的采样纹素或者修改texelSize的大小我们可以增加阴影的柔和都。下面是应用PCF的一个例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482406369.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/3.1.3.shadow_mapping/shadow_mapping.cpp">Code</a>。</p>
+<h1 id="正交投影vs透视投影">正交投影vs透视投影</h1>
+<p>  上面的例子我们都是使用正交投影来生成阴影的，因为是平行光，但对于点光源或者聚光灯需要使用透视投影来得到更真实的阴影，这里给出二者的区别：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482426290.png" alt="" loading="lazy"><br>
+  透视投影更适用于有确切位置的光源，正交投影则适用于没有确切位置的光源。<br>
+  另一个区别在于，使用透视投影的阴影贴图的深度值往往接近于1，这是因为通过透视投影，深度值被转化为非线性排布，所以，在使用透视投影计算阴影时，我们需要先将其转化到线性空间：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+  
+in vec2 TexCoords;
+
+uniform sampler2D depthMap;
+uniform float near_plane;
+uniform float far_plane;
+
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // Back to NDC 
+    return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
+}
+
+void main()
+{             
+    float depthValue = texture(depthMap, TexCoords).r;
+    FragColor = vec4(vec3(LinearizeDepth(depthValue) / far_plane), 1.0); // perspective
+    // FragColor = vec4(vec3(depthValue), 1.0); // orthographic
+</code></pre>
+<p>  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping">https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-opengljia-ma-xiao-zheng/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):伽马校正
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

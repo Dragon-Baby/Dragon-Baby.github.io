@@ -1,0 +1,523 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):绘制第一个三角形 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):绘制第一个三角形
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-01 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="相关知识">相关知识</h1>
+<p>在开始之前先阐述一下OpenGL到底是什么。OpenGL首先并不是一种API，更像是一种规范，一种说明书。OpenGL规定每个功能的输出及执行过程，根据这些开发者来制定接口。由于OpenGL本身没有给出接口的细节，所以说可以有多种版本的接口，但结果都是一样的。</p>
+<p>开发OpenGL库的经常是显卡制造商，每块显卡支持特定版本的由开发商制定的OpenGL。</p>
+<p>OpenGL在3.3版本之后有了很大的变化。在之前，开发者使用的是固定管线（快速模式）来开发OpenGL程序，虽然封装了很多功能使开发更为简单，但也失去了变化和自由，同时也不够高效。由此，可编程渲染管线（核心模式）诞生，当使用这种方法时，OpenGL强制使用更为现代的方法，使用过时的方法可能会报错。这种方式虽然更具灵活性，但也更为复杂。</p>
+<p>OpenGL本身是一种状态机，由一系列变量来描述OpenGL应该如何运作。每种状态下的OpenGL通常被当作是一个OpenGL环境。当使用OpenGL时，我们经常通过设定一些选项，操作一些缓冲来改变OpenGL的环境，之后用当前的环境渲染。</p>
+<p>OpenGL库使用C编写，并允许派生为其他语言。由于许多C语言的结构无法很好的转换到其他的高级语言，OpenGL衍生出了一些抽象结构，其中之一便是对象。对象是OpenGL中的一系列选项，代表一个OpenGL状态的子集，比如我们可以用一个对象代表绘制窗口的设定，然后可以设置尺寸，颜色。</p>
+<p>一个典型的对象如下：</p>
+<pre><code class="language-C">   struct object_name {
+       float option1;
+       int option2;
+       char[] name;
+   }
+</code></pre>
+<p>每当想使用这个对象时可以如下操作：</p>
+<pre><code class="language-c">        // OpenGL的一个状态
+        struct OpenGL_Context {
+            ...
+            object_name* object_Window_Target;
+            ...
+        }
+
+        //创建 对象
+        unsigned int objectId = 0;
+        glGenObject(1, &amp;ObjectId);
+        //绑定对象至环境
+        glBindObject(GL_WINDOW_TARGET, objectId);
+        //设置当前对象的选项
+        glSetObjectOption(GL_WINDOW_TARGET, GL_OPTION_WIDTH, 800);
+        glSetObjectOption(GL_WINDOW_TARGET, GL_OPTION_HEIGHT, 600);
+        //解除绑定
+        glBindObject(GL_WINDOW_TARGET, 0);
+</code></pre>
+<p>以上是在OpenGL开发过程中经常会使用到的方式。</p>
+<h1 id="创建窗口">创建窗口</h1>
+<p>在其他工作之前，我们需要先创建OpenGL环境和窗口。然而，这些方法每种操作系统都不一样，并且OpenGL特意将这些方法抽象化。所以说我们需要自己去实现创建OpenGL环境和窗口。当然，有很多现成的库可以使用，这里我们使用GLFW。</p>
+<p>建议从官网上下载源码，自己编译。（官网：<a href="https://www.glfw.org/download.html">GLFW</a>）（编译方法请参考官网说明）</p>
+<p>然后是另一个问题，就像之前说得，由于OpenGL并不是一种接口，大多数方法的位置在编译时是无法得知的，但是这些位置需要在运行时可查询，这些问题也可以使用现成的库来解决，例如GLAD,GLEW（编译方法请参考官网说明）。这里使用<a href="https://glad.dav1d.de/">GLAD</a>。</p>
+<p>按照常规配置VS的方法来配置好这些包含文件和库文件后，就开始创建窗口。</p>
+<pre><code class="language-C">#include &lt;glad/glad.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+</code></pre>
+<p>一定首先包含glad。<br>
+初始化窗口：</p>
+<pre><code class="language-C">    int main()
+    {
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        return 0;
+    }
+</code></pre>
+<p>我们通过glfwInit来初始化GLFW， 之后我们使用glfwWindowHint来配置属性，GLFW_CONTEX_VERSION_MAJOR和GLFW_CONTEXT_VERSION_MINOR来表示OPENGL的版本，为3.3（见上文，3.3版本足够使用大部分功能）， glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)表明我们使用可编程渲染管线。之后我们需要创建一个窗口对象，这个对象保存所有的窗口数据，大多数GLFW的方法都需要使用这个窗口对象：</p>
+<pre><code class="language-C">GLFWwindow* window = glfwCreateWindow(800, 600, &quot;LearnOpenGL&quot;, NULL, NULL);
+if(window == NULL)
+{
+    std::cout &lt;&lt; &quot;Failed to create GLFW window&quot; &lt;&lt; std::endl;
+    glfwTerminate();
+    return -1;
+}
+glfwMakeContextCurrent(window);
+</code></pre>
+<p>glfwCreateWindow方法需要窗口的宽度和高度作为前两个参数，第三个参数是窗口标题，后两个参数暂时忽略不计，全部置为NULL。这个方法返回一个GLFWwindow对象。之后我们让GLFW在当前线程生成窗口环境。</p>
+<p>接下来初始化GLAD：</p>
+<pre><code class="language-C">if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+{
+    std::cout &lt;&lt; &quot;Failed to initialize GLAD&quot; &lt;&lt; std::endl;
+    return -1;
+}
+</code></pre>
+<p>我们把glfwGetProcAddress作为OpenGL方法指针的地址，先进行强制类型转换，通过gladLoadGLLoader加载。</p>
+<p>在开始渲染前我们先定义渲染窗口：</p>
+<pre><code class="language-C">glViewport(0, 0, 800, 600);
+</code></pre>
+<p>接下来写一个自动缩放窗口的方法：</p>
+<pre><code class="language-C">void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{    
+    glViewPort(0, 0, width, height);
+}
+</code></pre>
+<p>通过下面的方法来登记函数，每次缩放窗口都调用一次上面的方法。</p>
+<pre><code class="language-C">glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+</code></pre>
+<p>我们不希望程序只渲染一张图便终止，所以我们写一个循环，并告知循环何时结束：</p>
+<pre><code class="language-C">while(!glfwWindowShouldClose(window))
+{
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+}
+</code></pre>
+<p>glfwWindowShouldClose方法检测窗口的停止。glfwPollEvents方法检测是否有事件触发（例如键盘输入，鼠标移动），并调用相关的方法（通过回调函数）。glfwSwapBuffers交换颜色缓冲，这个方法用来在渲染迭代时将渲染结果输出到屏幕上。</p>
+<p>注释：双缓冲：当程序在单缓冲中绘制最终的图像时，可能会产生显示闪烁问题，这是由于结果图像并不是立即绘制，而是从左到右从上到下逐像素绘制，这是需要一定时间的。为了解决这些问题，可以使用双缓冲来渲染。前缓冲包含接下来要渲染的图像结果，后缓冲包含当前在屏幕上绘制的图像， 渲染命令会渲染后缓冲，当渲染结束时，交换这两个缓冲。相当于提前计算结果，这样就可以解决闪烁问题。</p>
+<p>当退出渲染循环时，我们删除所有生成的GLFW资源，我们可以通过glfwTerminate方法来实现。</p>
+<pre><code class="language-C">glfwTerminate();
+return 0;
+</code></pre>
+<p>在编译并运行程序之后结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594472863907.png" alt="" loading="lazy"><br>
+接下来为窗口添加一些控制，我们希望按ESC键可以推出窗口。我们通过glfwGetKey方法来获取窗口键值输入，这个方法返回这个按键是否被按下，为GLFW_PRESS或GLFW_RELEASE。若按下ESC键，调用glfwSetWindowShouldClose关闭窗口同时我们创建一个processInput方法来管理这些按键输入：</p>
+<pre><code class="language-C">void processInput(GLFWwindow *window)
+{
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+}
+</code></pre>
+<p>我们需要在渲染循环的每次迭代中调用processInput方法：</p>
+<pre><code class="language-C">while (!glfwWindowShouldClose(window))
+{
+    processInput(window);
+    //一些渲染命令
+    ...
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+}
+</code></pre>
+<p>接下来我们需要在渲染循环中添加一些渲染命令，比如为屏幕填充一个颜色。我们通过glClear来清除设置的颜色缓冲，参数选择GL_COLOR_BUFFER_BIT来表示清除颜色缓冲：</p>
+<pre><code class="language-C">glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+glClear(GL_COLOR_BUFFER_BIT);
+</code></pre>
+<p>glClearColor用来设置颜色缓冲，从左到右为RGBA(0-1)。编译并运行修改过的程序可以获得以下结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594472940859.png" alt="" loading="lazy"><br>
+这里粘贴一下原文代码地址，可以参考一下：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/1.getting_started/1.2.hello_window_clear/hello_window_clear.cpp">code</a></p>
+<h1 id="绘制三角形">绘制三角形</h1>
+<p>在开始之前先介绍一下可编程渲染管线：<br>
+<img src="https://dragon-baby.github.io/post-images/1594473019903.png" alt="" loading="lazy"><br>
+渲染管线接收一系列三维顶点数据作为输入，最后转换为二维像素点到屏幕上。就如上图，渲染管线可以被分为几个步骤，每个步骤需要上一个步骤的输出并将输出作为下一个步骤的输入。所有这些步骤被高度规范化并可以很简单的并行运行，得益于这种特性，如今的显卡可以快速处理大量的包含在管线中的数据。CPU为每个步骤在GPU上运行一些小程序，这些小程序被称为着色器（shader）。</p>
+<p>一些着色器可以自定义来替换默认的着色器。这些着色器由GLSL编写。</p>
+<p>对渲染管线举一个例子。比如我们要渲染一个三角形，我们首先将包含三个构成三角形三维坐标的列表传入，这被称为顶点数据；这些顶点数据是顶点的集合，一个顶点是三维坐标数据的集合。一个顶点其实可以包含属性，这里暂时只考虑位置和颜色。</p>
+<p>接下来的管线第一部分是顶点着色器阶段， 将一个顶点作为输入。顶点着色器的主要目的是将顶点的三维坐标转换为其它空间里的坐标，同时允许我我们简单的处理一下顶点的属性。</p>
+<p>接下来是管线的第二部分，将所有顶点作为输入来装配图形，比如这里的例子是三角形。</p>
+<p>之后将上一阶段的输出传递至几何着色器。几何着色器将一系列可构成图形的顶点作为输入，在这一阶段可以添加新的顶点来组成新的图形，比如可以在第一个三角形的基础上生成第二个三角形。</p>
+<p>之后几何着色器的输出传至光栅化阶段，将结果图形映射到屏幕的相应像素位置上。在将结果传递至片元着色器前，会执行切割操作。切割操作会剔除所有看不到的片段。</p>
+<p>接着是片元着色器阶段，主要目的是计算最终的像素颜色。</p>
+<p>最终进入到测试阶段，包括alpha测试，混合，深度测试，模板测试，在这个阶段会进一步处理像素片段。</p>
+<p>整个渲染管线如上，虽然很复杂，但我们只需关心几个着色器的编写。同时注意，除了几何着色器是可选的外，顶点着色器和片元着色器是必须的。</p>
+<p>在开始绘制三角形前我们先设置顶点数据，注意，OpenGL只支持标准化设备坐标（NDC），即取值范围为-1到1，超出的将会不可见。</p>
+<p>下面定义一个三角形的顶点坐标数组：</p>
+<pre><code class="language-c++">float vertices[] = {
+    -0.5f, -0.5f, 0.0f,
+    0.5f, -0.5f, 0.0f,
+    0.0f,  0.5f, 0.0f
+};
+</code></pre>
+<p>由于是平面图形，所以设置z轴为0。参考如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594473109069.png" alt="" loading="lazy"><br>
+注意，坐标系为原点在中心的右手坐标系。我们的NDC坐标在之后会通过glViewport的参数转换为屏幕坐标。</p>
+<p>按照之前说过的流程，我们先将这些顶点数据送往顶点着色器。具体做法是在GPU中开辟一片用来存储顶点数据的存储区域，并做好设置，告知OpenGL如何使用这片区域并将顶点数据送往显卡，接着顶点着色器处理这些顶点数据。</p>
+<p>我们通过顶点缓冲对象（VBO）来管理这片存储区域。VBO的好处是我们可以一次将大量顶点数据送往显卡。类似于之前所说的OpenGL中的对象概念，缓冲对象需要有一个特有的ID，通过glGenBuffers实现：</p>
+<pre><code class="language-c++">unsigned int VBO;
+glGenBuffers(1, &amp;VBO);
+</code></pre>
+<p>OpenGL有许多种不同的缓冲对象，顶点缓冲对象的一种缓冲类型是GL_ARRAY_BUFFER。我们通过glBindBuffer将上述创建的缓冲对象绑定给目标GL_ARRAY_BUFFER：</p>
+<pre><code class="language-c++">glBindBuffer(GL_ARRAY_BUFFER, VBO);
+</code></pre>
+<p>接着我们将顶点数组中的数据传入缓冲存储区域，通过glBufferData方法：</p>
+<pre><code class="language-c++">glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+</code></pre>
+<p>第一个参数表示我们想将数据传入的目标，第二个参数是传入数据的大小，第三个参数是要传入的数据，最后一个参数代表我们只设置一次数据并多次使用。</p>
+<p>接下来进入顶点着色器的编写，对于绘制三角形，一个典型的顶点着色器代码如下：</p>
+<pre><code class="language-c++">#version 330 core
+layout (location = 0) in vec3 aPos;
+
+void main()
+{
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+}
+</code></pre>
+<p>第一行代表我们使用的OpenGL版本和使用的模式，接着通过layout (location = 0)表示我们需要的部分顶点坐标的位置，我们目前只设置了顶点的位置属性，且为3维坐标，所以通过in将数据传入自定义的vec3类型(三维向量)的aPos中。接着在main方法中，我们将数据组装为vec4类型并传入gl_Position(由OpenGL定义好的代表顶点位置的变量)，gl_Position之所以是四维向量是因为除开xyz坐标后还有一个用来进行透视处理的w，这个在之后讨论，这里简单的设置为1就可以了。</p>
+<p>接着我们编译顶点着色器。目前暂时先用一个变量来存储这段代码：</p>
+<pre><code class="language-c++">const char* vertexShaderSource = &quot;#version 330 core\n&quot; 
+    &quot;layout (location = 0) in vec3 aPos;\n&quot; 
+    &quot;void main()\n&quot; 
+    &quot;{\n&quot;
+     &quot; gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n&quot; 
+    &quot;}\0&quot;;
+</code></pre>
+<p>为了让OpenGL使用着色器我们需要在运行时动态编译这段代码。首先先创建一个着色器对象，然后赋予ID，这里使用glCreateShader方法(GL_VERTEX_SHADER代表代表着色器类型)：</p>
+<pre><code class="language-c++">unsigned int vertexShader;
+vertexShader = glCreateShader(GL_VERTEX_SHADER);
+</code></pre>
+<p>接着我们将着色器源码传入并编译着色器：</p>
+<pre><code class="language-c++">glShaderSource(vertexShader, 1, &amp;vertexShaderSource, NULL);
+glCompileShader(vertexShader);
+</code></pre>
+<p>glShaderSource将要编译的着色器对象作为第一个参数，第二个参数代表我们要传入多少段字符串作为源码，第三个参数传入源码地址，第四个为NULL即可。glCompileShader编译参数中的着色器。</p>
+<p>为了判断着色器是否编译成功，我们通过以下方法抛出错误：</p>
+<pre><code class="language-c++">int success;
+char infoLog[512];
+glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &amp;success);
+if(!success)
+{
+    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+    std::cout &lt;&lt; &quot;ERROR::SHADER::VERTEX::COMPILATION::FAILED\n&quot; &lt;&lt; infoLog &lt;&lt; std::endl;
+}
+</code></pre>
+<p>glGetShaderiv将编译是否成功的结果传入success，如果success为false，则通过glGetShaderInfoLog将错误信息传入infoLog中，并打印。</p>
+<p>接下类编写片元着色器，对于绘制三角形，一段典型的代码如下：</p>
+<pre><code class="language-c++">#version 330 core
+out vec4 FragColor;
+void main()
+{
+    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+}
+</code></pre>
+<p>片元着色器只支持一个颜色输出，这里定义为FragColor，设置好RGBA四个通道的数据，组装为vec4传入FragColor。</p>
+<p>接着编译片元着色器，步骤与顶点着色器一致，我们将代码存储在fragmentShaderSource中，注意片元着色器特有的参数(GL_FRAGMENT_SHADER)变化：</p>
+<pre><code class="language-c++">unsigned int fragmentShader;
+fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+glShaderSource(fragmentShader, 1, &amp;fragmentShaderSource, NULL);
+glCompileShader(fragmentShader);
+</code></pre>
+<p>接着与顶点着色器一致，设置好抛出错误的方法，这里不展示。</p>
+<p>最后要做的是将两个着色器链接至一个着色器程序，然后就可以使用着色器程序进行渲染。</p>
+<p>与之前步骤类似，我们通过glCreateProgramc创建一个着色器程序对象：</p>
+<pre><code class="language-c++">unsigned int shaderProgram;
+shaderProgram = glCreateProgram();
+</code></pre>
+<p>glCreateProgram创建一个着色器程序，返回程序对象的ID引用。接着使用glAttachShader附加着色器对象，并使用glLinkProgram链接程序：</p>
+<pre><code class="language-c++">glAttachShader(shaderProgram, vertexShader);
+glAttachShader(shaderProgram, fragmentShader);
+glLinkProgram(shaderProgram);
+</code></pre>
+<p>同样需要检查链接错误，将glGetShaderiv和glGetShaderInfoLog替换为glGetProgramiv和glGetProgramInfoLog。</p>
+<p>在链接程序后我们可以删除着色器了：</p>
+<pre><code class="language-c++">glDeleteShader(vertexShader);
+glDeleteShader(fragmentShader);
+</code></pre>
+<p>接着我们可以使用glUseProgram来激活程序：</p>
+<pre><code class="language-c++">glUseProgram(shaderProgram);
+</code></pre>
+<p>在处理完着色器相关问题后，OpenGL仍不知道如何处理内存中的顶点数据以及如何将顶点数据 与顶点着色器的属性相连接。接下来说明解决方法。</p>
+<p>针对我们三角形的顶点缓冲数据，组成如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594473390948.png" alt="" loading="lazy"><br>
+每个顶点的单个坐标大小为4字节，总共12字节，顶点与顶点之间无间隙，顶点数据的第一个值位于缓冲的开始。于是，通过glVertexAttribPointer以及上述特点，我们可以告知OpenGL如何解释这些顶点数据：</p>
+<pre><code class="language-c++">glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+glEnableVertexAttribArray(0);
+</code></pre>
+<p>glVertexAttribPointer的第一个参数对应顶点属性的位置，这与顶点着色器中顶点属性设置的layout (location = x)相关，这里为0；第二个参数代表顶点属性的大小，这里是顶点位置，为三维向量，所以设为3；第三个参数代表数据的类型；第四个参数代表是否标准化坐标，我们已经手动设置好了，这里设为否；第五个参数代表步长，每一个顶点包含3个坐标，每个坐标的大小为float的大小，所以是3<em>sizeof(float)；最后一个参数是偏移量，即代表数据从哪里开始，这里为0，注意应为void</em>类型。之后通过glEnableVertexAttribArray开启对应位置的顶点属性，这里为0。</p>
+<p>最后，在渲染循环中，一段绘制物体的代码如下：</p>
+<pre><code class="language-c++">// 首先将VBO中的数据复制到GL_ARRAY_BUFFER中
+glBindBuffer(GL_ARRAY_BUFFER, VBO);
+glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+// 然后设置顶点属性指针
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+glEnableVertexAttribArray(0);
+// 接着使用着色器程序
+glUseProgram(shaderProgram);
+// 最后就可以绘制我们的图形了
+someOpenGLFunctionThatDrawOurTriangle();
+</code></pre>
+<p>简单的图形还好，但如果处理较为复杂的模型，以上的代码若在循环中反复使用，就显得非常复杂了和臃肿了。为解决这一问题，我们引入顶点阵列对象(VAO)。</p>
+<p>VAO可以和VBO一样定义和绑定，并存储所有对顶点属性的调用。所以使用VAO，我们可以只需要配置一次顶点属性指针，转换不同的顶点数据的话也只需要绑定不同的VAO就可以。简单说就是可以在渲染循环外配置一次glVertexAttribPointer和glEnableVertexAttribArray。</p>
+<p>和VBO一样，使用VAO过程如下：</p>
+<pre><code class="language-c++">unsigned int VAO;
+glGenVertexArrays(1, &amp;VAO);
+//绑定VAO
+glBindVertexArray(VAO);
+//将VBO中的数据复制到GL_ARRAY_BUFFER中
+glBindBuffer(GL_ARRAY_BUFFER, VBO);
+glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+// 然后设置顶点属性指针
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+glEnableVertexAttribArray(0);
+</code></pre>
+<p>最后，准备工作全部就绪，在之前的渲染循环的清除颜色缓冲代码下添加一下渲染代码：</p>
+<pre><code class="language-c++">glUseProgram(shaderProgram);
+glBindVertexArray(VAO);
+glDrawArrays(GL_TRIANGLES, 0, 3);
+</code></pre>
+<p>glDrawArrays第一个参数代表我们想要绘制的图形，这里设置为三角形；第二个参数代表第一个顶点的索引，这里设为0；第三个三处为顶点数，一个三角形三个顶点，设为3。</p>
+<p>编译代码并运行，就可以看到我们绘制的第一个三角形：<br>
+<img src="https://dragon-baby.github.io/post-images/1594473485497.png" alt="" loading="lazy"><br>
+这里附上原文的代码：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/1.getting_started/2.1.hello_triangle/hello_triangle.cpp">Code</a></p>
+<p>当然工作并没有结束。由于OpenGL对于多边形只支持三角形，所以针对上述方法，若想绘制一个四边形，那就是绘制两个三角形，顶点数据如下：</p>
+<pre><code class="language-c++">float vertices[] = {
+   // 第一个三角形
+   0.5f, 0.5f, 0.0f, 
+   0.5f, -0.5f, 0.0f, 
+    -0.5f, 0.5f, 0.0f, 
+   // 第二个三角形
+   0.5f, -0.5f, 0.0f, 
+   -0.5f, -0.5f, 0.0f, 
+    -0.5f, 0.5f, 0.0f 
+};
+</code></pre>
+<p>想象一下或在纸上画画就会发现有两个顶点被重复定义，本身只需要4个顶点，却定义了6个顶点，对于这个四边形还好，若是有上千上万个面的模型，这种重复定义的开销是巨大的。由此我们引入元素缓冲对象(EBO)的概念。</p>
+<p>EBO与VAO,VBO一样，也是一种缓冲对象，它存储绘制的索引信息，这样对于四个顶点，我们可以按照两种顺序依次画出两个三角形来组成一个四边形。首先进行定义：</p>
+<pre><code class="language-c++">float vertices[] = 
+{
+    0.5f, 0.5f, 0.0f,
+    0.5f, -0.5f, 0.0f,
+    -0.5f, -0.5f, 0.0f,
+    -0.5f, 0.5f, 0.0f
+};
+unsigned int indices[] = {
+    0, 1, 3,
+    1, 2, 3
+};
+</code></pre>
+<p>我们可以按照定义想象一下两个三角形是如何绘制出来的。接下来按照常规，定义EBO:</p>
+<pre><code class="language-c++">unsigned int EBO;
+glGenBuffers(1, &amp;EBO);
+</code></pre>
+<p>同样进行缓冲对象的绑定和数据传输，不同的是目标换成了GL_ELEMENT_ARRAY_BUFFER，数据换为indices：</p>
+<pre><code class="language-c++">glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+</code></pre>
+<p>之后的工作就是将渲染循环中的glDrawArrays替换掉：</p>
+<pre><code class="language-c++">glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+</code></pre>
+<p>glDrawElements第一个参数表示要绘制的多边形类型；第二个参数要绘制的顶点数量，我们在定义了6个索引，所以绘制的顶点数量为6；第三个参数是索引的类型；最后一个参数是偏移量，这里为0。</p>
+<p>同样，由于我们使用了VAO，所以我们只需要在渲染循环外绑定一次EBO即可，一段简易的代码说明如下：</p>
+<pre><code class="language-c++">//先初始化各种东西
+//绑定VAO
+glBindVertexArray(VAO);
+//将顶点数据数据传入顶点缓冲
+glBindBuffer(GL_ARRAY_BUFFER, VBO);
+glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+//将索引数据传入元素缓冲
+glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+//设置顶点对象指针
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+glEnableVertexAttribArray(0); 
+//各种其它代码
+[...]
+//绘制图形（在渲染循环中）
+glUseProgram(shaderProgram);
+glBindVertexArray(VAO)
+;glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+glBindVertexArray(0);
+</code></pre>
+<p>运行程序就可以得到四边形了，同时我们可一添加glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)线框化显示来仔细观察绘制顺序。（glPolygonMode第一个参数代表前后全部三角形，第二个参数代表线框化显示）<br>
+<img src="https://dragon-baby.github.io/post-images/1594473648357.png" alt="" loading="lazy"><br>
+这里贴上原文代码：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/1.getting_started/2.2.hello_triangle_indexed/hello_triangle_indexed.cpp">Code</a></p>
+<p>强烈推荐阅读英文原版：<a href="https://learnopengl.com/Getting-started/OpenGL">https://learnopengl.com/Getting-started/OpenGL</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/dong-hua-zhong-ge-ji-qiao-1/" class="post-title gt-a-link">
+                    动画中割技巧1
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

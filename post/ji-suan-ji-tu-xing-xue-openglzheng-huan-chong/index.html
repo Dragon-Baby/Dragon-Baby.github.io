@@ -1,0 +1,456 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):帧缓冲 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):帧缓冲
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-08 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="帧缓冲">帧缓冲</h1>
+<p>  至今为止我们已经使用了几种不同类型的屏幕缓冲：颜色缓冲，深度缓冲，模板缓冲。这些缓冲的结合被称为帧缓冲。OpenGL允许我们定义自己的帧缓冲，一次来定义我们自己的颜色、深度、模板缓冲。<br>
+  我们到目前位置所做的一些渲染操作全都是在默认的帧缓冲之上实现的。在使用GLFW时，它默认会创建并配置这个默认的帧缓冲。通过自定义帧缓冲我们会得到一个新的可渲染目标。<br>
+  使用不同的帧缓冲，我们可以得到类似创建镜像的效果，或者进行一些特殊的后期处理。接下来我们介绍帧缓冲如何工作的以及如何使用帧缓冲。</p>
+<h2 id="创建帧缓冲">创建帧缓冲</h2>
+<p>  和OpenGL中的其它对象一样，我们通过glGenFramebuffers来创建帧缓冲(FBO):</p>
+<pre><code class="language-cpp">unsigned int fbo;
+glGenFramebuffers(1, &amp;fbo);
+</code></pre>
+<p>  接着我们将这个FBO对象绑定至帧缓冲区目标：</p>
+<pre><code class="language-cpp">glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+</code></pre>
+<p>  当然我们可以单独的绑定到可读帧缓冲区(GL_READ_FRAMEBUFFER)和可绘制帧缓冲区(GL_DRAW_FRAMEBUFFER)。<br>
+  但现在还不能使用这个帧缓冲，我们还需要进行以下步骤：</p>
+<ul>
+<li>至少附加上一种缓冲(颜色、深度、模板)</li>
+<li>至少附加上一种颜色。</li>
+<li>所有的附加操作都必须完整。</li>
+<li>每个缓冲都应该由相同数量的采样数。<br>
+  根据步骤我们需要创建一些针对帧缓冲的附加项。在我们完成所有步骤后，我们可以通过glCheckFramebufferStatus(GL_FRAMEBUFFER)来检查是否成功，如果返回值等于GL_FRAMEBUFFER_COMPLETE就是成功的，<a href="https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glCheckFramebufferStatus.xhtml">这里</a>可以查询其它的返回值：</li>
+</ul>
+<pre><code class="language-cpp">if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+// 执行成功后的步骤
+</code></pre>
+<p>  由于我们的帧缓冲不是默认的，在我们帧缓冲上面执行的渲染命令不会输出到屏幕上。因为这种原因，使用不同的帧缓冲渲染被称为离屏渲染。为了能够使用我们自定义的帧缓冲，我们需要将默认的帧缓冲与0绑定来取消激活：</p>
+<pre><code class="language-cpp">glBindFramebuffer(GL_FRAMEBUFFER, 0);
+</code></pre>
+<p>  在执行完所有的帧缓冲操作后，我们删除创建的帧缓冲对象：</p>
+<pre><code class="language-cpp">glDeleteFramebuffers(1, &amp;fbo);  
+</code></pre>
+<p>  在帧缓冲完整度检查前，我们需要为帧缓冲添加一些附加项。一个附加项对帧缓冲来说是一个表现为一片缓冲区的存储位置。当创建附加项时，我们有两个选项，纹理或渲染缓冲对象。</p>
+<h2 id="纹理附加项">纹理附加项</h2>
+<p>  当为一个帧缓冲附加一个纹理时，所有的渲染命令会像对待颜色、深度和模板缓冲一样写入纹理。使用纹理的好处是渲染输出可以保存在一张纹理图片中，随后我们在着色器中使用。<br>
+  为帧缓冲创建一张纹理和普通的纹理一致：</p>
+<pre><code class="language-cpp">
+unsigned int texture;
+glGenTextures(1, &amp;texture);
+glBindTexture(GL_TEXTURE_2D, texture);
+  
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+</code></pre>
+<p>  不同之处在于我们将纹理的宽和高设为屏幕的宽和高（不是必须的），并将传入纹理的数据设为NULL，相当于创建空纹理。之后再帧缓冲上渲染时会写入数据。注意这里我们不需要考虑纹理映射和mipmaps。<br>
+  接下来我们将纹理附加到帧缓冲上：</p>
+<pre><code class="language-cpp">glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+</code></pre>
+<p>  glFramebufferTexture2D有五个参数：</p>
+<ul>
+<li>target：附加的目标，即帧缓冲。</li>
+<li>attachment：我们想要附加的附加项种类。这里我们附加颜色附加项。注意，末尾为0代表我们附加多个颜色附加项。</li>
+<li>textarget：附加的纹理类别。</li>
+<li>level：mipmap级别。<br>
+  除了颜色纹理我们也可以附加深度和模板纹理，只需要修改附加项的种类，如深度附加项为GL_DEPTH_ATTACHMENT，但纹理的类别需修改为GL_DEPTH_COMPONENT。模板缓冲我们使用GL_STENCIL_ATTACHMENT和GL_STENCIL_INDEX。<br>
+  当然，将深度缓冲和模板缓冲作为一张纹理附加是可能的。32bit大小的纹理可以包含24bit大小的深度信息和8bit的模板信息。我们使用GL_DEPTH_STENCIL_ATTACHMENT方式来作为附加项种类，下面是一个例子：</li>
+</ul>
+<pre><code class="language-cpp">glTexImage2D(
+  GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, 800, 600, 0, 
+  GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL
+);
+
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture, 0);  
+</code></pre>
+<h2 id="渲染缓冲对象附加项">渲染缓冲对象附加项</h2>
+<p>  和纹理一样，渲染缓冲对象也是一种缓冲，然而，渲染缓冲不能直接读取，但这样也让OpenGL可以进行一些内存优化，在针对离屏渲染时有更大的优势。<br>
+  渲染缓冲对象直接将所有的渲染数据存储到它的缓冲区中，不需要转化到特定的纹理模式，可以作为一个快速的可写入存储中心。虽不能直接读取，但我们可以使用glReadPixels缓慢读取，这个方法返回当前帧缓冲区特定的一片区域的像素，而不是附加项本身。<br>
+  由于数据以一种特殊的格式存储，所有在写入数据或将数据复制到其它缓冲时非常迅速。使用渲染缓冲会大大提升切换缓冲时的速度。我们之前使用的glSwapBuffers正是渲染缓冲的一种应用：我们将数据写入一个渲染缓冲区，最后与另一个交换。<br>
+  创建一个渲染缓冲对象也是使用类似的方法：</p>
+<pre><code class="language-cpp">unsigned int rbo;
+glGenRenderbuffers(1, &amp;rbo);
+</code></pre>
+<p>  接着我们将rbo绑定至渲染缓冲区：</p>
+<pre><code class="language-cpp">glBingRenderbuffer(GL_RENDERBUFFER, rbo);
+</code></pre>
+<p>  由于渲染缓冲对象不可读，所以常作为深度和模板附加项使用（大多数时候我们不考虑读取值，而更关心深度和模板检测）。我们需要深度和模板检测，但不需要采样值，所以渲染缓冲对象非常合适。<br>
+  我们使用glRenderbufferStorage来创建深度和模板的渲染缓冲对象：</p>
+<pre><code class="language-cpp">glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+</code></pre>
+<p>  创建渲染缓冲对象和纹理对象一致，但渲染缓冲对象是专门设计来作为帧缓冲附加项的。我们使用GL_DEPTH24_STENCIL_8来作为内部格式。<br>
+  最后我们附加上渲染缓冲对象：</p>
+<pre><code class="language-cpp">glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+</code></pre>
+<p>  注意纹理对象和渲染缓冲对象的选择。当我们不需要从缓冲进行采样数据时，我们选择渲染缓冲对象，反之，我们使用纹理对象。</p>
+<h2 id="渲染到一张纹理">渲染到一张纹理</h2>
+<p>  我们已经知道了帧缓冲的工作原理，现在来使用帧缓冲。我们将渲染场景到一张附加到帧缓冲对象上的颜色纹理上，并将纹理绘制到覆盖整个屏幕的四边形上。<br>
+  首先我们创建帧缓冲对象以及绑定：</p>
+<pre><code class="language-cpp">unsigned int framebuffer;
+glGenFramebuffers(1, &amp;framebuffer);
+glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+</code></pre>
+<p>  接下来创建一张纹理(屏幕大小)来作为颜色附加项附加到帧缓冲上：</p>
+<pre><code class="language-cpp">// 生成纹理
+unsigned int texColorBuffer;
+glGenTexture(1, &amp;texColorBuffer);
+glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+glBindTexture(GL_TEXTURE_2D, 0);
+
+// 附加到当前的帧缓冲上
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0); 
+</code></pre>
+<p>  我们希望也可以进行深度测试（模板测试可选），这里使用渲染缓冲对象来作为深度附加项。<br>
+  创建渲染缓冲对象并绑定到缓冲区域：</p>
+<pre><code class="language-cpp">unsigned int rbo;
+glGenRenderbuffers(1, &amp;rbo);
+glBindRenderbuffer(GL_RENDERBUFFER, rbo); 
+glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);  
+// 创建好内存区域后解绑
+glBindRenderbuffer(GL_RENDERBUFFER, 0);
+</code></pre>
+<p>  将渲染缓冲对象附加到帧缓冲上：</p>
+<pre><code class="language-cpp">glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+</code></pre>
+<p>  接着我们检查帧缓冲是否完整：</p>
+<pre><code class="language-cpp">if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	std::cout &lt;&lt; &quot;ERROR::FRAMEBUFFER:: Framebuffer is not complete!&quot; &lt;&lt; std::endl;
+glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+</code></pre>
+<p>  记得解绑帧缓冲来确保在帧缓冲上不会有其它的渲染操作。<br>
+  之后在渲染时绑定帧缓冲对象替代默认的帧缓冲对象，所有的渲染操作都将影响当前的帧缓冲。所有的深度和模板操作将从当前的帧缓冲读取相应的值。<br>
+  所以，将场景绘制到一张纹理需要以下的步骤：</p>
+<ol>
+<li>像往常一样用替换过的帧缓冲渲染场景。</li>
+<li>绑定到默认的帧缓冲。</li>
+<li>将新的帧缓冲的颜色缓冲作为纹理绘制覆盖整个屏幕的四边形。<br>
+  其它的场景物体与之前一致，同时我们为覆盖整个屏幕的四边形创建新的着色器，我们不需要，进行MVP变换，顶点着色器：</li>
+</ol>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec2 aTexCoords;
+
+out vec2 TexCoords;
+
+void main()
+{
+    gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0); 
+    TexCoords = aTexCoords;
+}  
+</code></pre>
+<p>  在片元着色器中我们定义一张纹理，并将其作为颜色输出：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+  
+in vec2 TexCoords;
+
+uniform sampler2D screenTexture;
+
+void main()
+{ 
+    FragColor = texture(screenTexture, TexCoords);
+}
+</code></pre>
+<p>  在渲染前我们创建四边形的VAO并配置好。之后再渲染循环中大致这样进行：</p>
+<pre><code class="language-cpp">//第一步，使用新的FBO照常绘制场景
+glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+glEnable(GL_DEPTH_TEST);
+DrawScene();	
+  
+// 第二步，使用默认的FBO绘制
+glBindFramebuffer(GL_FRAMEBUFFER, 0); // 切换回默认的FBO
+glClearColor(1.0f, 1.0f, 1.0f, 1.0f); 
+glClear(GL_COLOR_BUFFER_BIT);
+  
+//绘制屏幕四边形
+screenShader.use();  
+glBindVertexArray(quadVAO);
+glDisable(GL_DEPTH_TEST);
+glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+glDrawArrays(GL_TRIANGLES, 0, 6);  
+</code></pre>
+<p>  渲染结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480309156.png" alt="" loading="lazy"><br>
+  左侧和平常一样，在右侧，当我们使用线框显示时会发现我们只再默认的帧缓冲中绘制了一个四边形。</p>
+<h2 id="后期处理">后期处理</h2>
+<p>  所有的场景都被渲染到了一张纹理中，所以我们可以通过操作这张纹理来进行一些特殊的处理。</p>
+<h3 id="反相">反相</h3>
+<p>  我们在屏幕四边形的片元着色器中用<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>1.0</mn></mrow><annotation encoding="application/x-tex">1.0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">.</span><span class="mord">0</span></span></span></span>减去纹理颜色来进行反相：</p>
+<pre><code class="language-GLSL">void main()
+{
+    FragColor = vec4(vec3(1.0 - texture(screenTexture, TexCoords)), 1.0);
+}  
+</code></pre>
+<p>  结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480322821.png" alt="" loading="lazy"><br>
+  非常有意思！</p>
+<h3 id="灰度显示">灰度显示</h3>
+<p>  我们还可以灰度显示场景。我们可以将纹理颜色的RGB通道做一个平均来得到灰度结果：</p>
+<pre><code class="language-GLSL">void main()
+{
+    FragColor = texture(screenTexture, TexCoords);
+    float average = (FragColor.r + FragColor.g + FragColor.b) / 3.0;
+    FragColor = vec4(average, average, average, 1.0);
+}   
+</code></pre>
+<p>  但人眼对绿色更敏感，对蓝色最不敏感，我们可以使用加权平均来进行灰度显示：</p>
+<pre><code class="language-GLSL">void main()
+{
+    FragColor = texture(screenTexture, TexCoords);
+    float average = 0.2126 * FragColor.r + 0.7152 * FragColor.g + 0.0722 * FragColor.b;
+    FragColor = vec4(average, average, average, 1.0);
+}   
+</code></pre>
+<p>  结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480338821.png" alt="" loading="lazy"></p>
+<h3 id="克尔效应">克尔效应</h3>
+<p>  由于整个场景被渲染成一张纹理，我们可以进行所有针对纹理的处理。我们可以使用卷积和滤波来进行图片处理（有关内容请关注数字图像处理这门学科）。<br>
+  克尔效应使用下列的卷积矩阵进行变化：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480431788.png" alt="" loading="lazy"><br>
+  我们将像素的邻接的8个像素逐一与矩阵的每个元素相乘最后相加的到像素的某一通道的值，遍历所有的像素进行同样的操作。在片元着色器中这样使用：</p>
+<pre><code class="language-cpp">const float offset = 1.0 / 300.0;  //（纹理坐标以左下角为原点，范围为[0,1]，同时分辨率为800*600）
+
+void main()
+{
+    //每个像素与8个邻接像素构成的坐标系（纹理坐标以左下角为原点，范围为[0,1]，同时分辨率为800*600）
+    vec2 offsets[9] = vec2[](
+        vec2(-offset,  offset), // top-left
+        vec2( 0.0f,    offset), // top-center
+        vec2( offset,  offset), // top-right
+        vec2(-offset,  0.0f),   // center-left
+        vec2( 0.0f,    0.0f),   // center-center
+        vec2( offset,  0.0f),   // center-right
+        vec2(-offset, -offset), // bottom-left
+        vec2( 0.0f,   -offset), // bottom-center
+        vec2( offset, -offset)  // bottom-right    
+    );
+
+    float kernel[9] = float[](
+        -1, -1, -1,
+        -1,  9, -1,
+        -1, -1, -1
+    );
+    
+    vec3 sampleTex[9];
+    for(int i = 0; i &lt; 9; i++)
+    {
+        sampleTex[i] = vec3(texture(screenTexture, TexCoords.st + offsets[i]));
+    }
+    vec3 col = vec3(0.0);
+    for(int i = 0; i &lt; 9; i++)
+        col += sampleTex[i] * kernel[i];
+    
+    FragColor = vec4(col, 1.0);
+}  
+</code></pre>
+<p>  若运行程序，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480411061.png" alt="" loading="lazy"></p>
+<h3 id="模糊">模糊</h3>
+<p>  模糊的操作为：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480403316.png" alt="" loading="lazy"><br>
+  相当于将像素与8邻接像素进行加权平均。内核阵列为：</p>
+<pre><code class="language-GLSL">float kernel[9] = float[](
+    1.0 / 16, 2.0 / 16, 1.0 / 16,
+    2.0 / 16, 4.0 / 16, 2.0 / 16,
+    1.0 / 16, 2.0 / 16, 1.0 / 16  
+);
+</code></pre>
+<p>  同样进行相关操作，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480392131.png" alt="" loading="lazy"></p>
+<h3 id="边缘检测">边缘检测</h3>
+<p>  边缘检测的核心矩阵为：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480457492.png" alt="" loading="lazy"><br>
+  替换掉核心矩阵，运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480468897.png" alt="" loading="lazy"><br>
+  更多的相关操作请参考数字图像处理相关书籍。<br>
+  最后，请多多关注原文：<a href="https://learnopengl.com/Advanced-OpenGL/Framebuffers">https://learnopengl.com/Advanced-OpenGL/Framebuffers</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglmian-xiao-yin/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):面消隐
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

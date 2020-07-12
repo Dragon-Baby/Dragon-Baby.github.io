@@ -1,0 +1,233 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):高级光照 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):高级光照
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-12 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="blinn-phong">Blinn-Phong</h1>
+<p>  Phong模型的光照模拟非常棒，但在它的高光会在某些特定条件下变得非常不真实，比如将Phong光照应用在大面积范围时，反光系数非常低，下面是使用1.0高光系数的一个例子（一般是32）：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481775668.png" alt="" loading="lazy"><br>
+  我们可以看到在边缘区域高光立刻消失，这是因为视线向量和反射向量间的夹角不能超过90度，如果超过90度，点积会小于零那么最后不会对高光系数做贡献。也许我们认为这不该成为一个问题，本来就不应该大于90度，对不对？<br>
+  但这是错的，之前我们考虑的情况都是观察者和光源在法线的异侧，如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481802217.png" alt="" loading="lazy"><br>
+  左侧是通常的Phong模型，但只考虑了视线和光源方向的夹角大于90度的情况，这样也表明Phong模型只考虑了视线方向和反射向量不超过90度的情况。右侧我们可以看到视线方向和反射向量夹角大于90度，按照Phong模型理论这不会看到高光，但也正是这样才会造成视觉上会有人工光照的感觉。<br>
+  为解决这一问题Blinn-Phong模型被提出，它是Phong的改进版模型。Blinn-Phong模型和Phong模型类似，唯一的区别是我们不使用视线方向，而是使用一个中间向量：位于视线方向和光源方向之间。这个中间向量越靠近法线，对高光的影响越大：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481814932.png" alt="" loading="lazy"><br>
+  可以看到，如果我们使用这个夹角的话，在实际情况下是不会大于90度的，也就满足了所有观察情况。<br>
+  我们这样计算这个中间向量：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481827232.png" alt="" loading="lazy"><br>
+  转化为GLSL代码如下：</p>
+<pre><code class="language-GLSL">vec3 lightDir   = normalize(lightPos - FragPos);
+vec3 viewDir    = normalize(viewPos - FragPos);
+vec3 halfwayDir = normalize(lightDir + viewDir);
+</code></pre>
+<p>  接着，我们计算高光因数将使用中间向量和法线的点积：</p>
+<pre><code class="language-GLSL">float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+vec3 specular = lightColor * spec;
+</code></pre>
+<p>  其它的所有操作都与Phong模型一致。<br>
+  下面进行对比，我们将反光系数(shiness)设为0.5：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481838815.png" alt="" loading="lazy"><br>
+  另一个差异是Blinn-Phong模型的高光在相同参数下要比Phong模型柔和一下，所以我们往往需要将Blinn-Phong模型的反光系数调高一下来得到和Phong模型类似的效果。一般要调高2到4倍。<br>
+  下面是反光系数8.0的Phong模型和32.0的Blinn-Phong模型的效果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481848517.png" alt="" loading="lazy"><br>
+  可以看到Blinn-Phong的高光要尖锐一些，所以为了得到更相似的结果我们需要更多的调整。<br>
+  我们可以使用一个简单的片元着色器来切换Phong模型光照和Blinn-Phong模型光照：</p>
+<pre><code class="language-GLSL">void main()
+{
+    [...]
+    float spec = 0.0;
+    if(blinn)
+    {
+        vec3 halfwayDir = normalize(lightDir + viewDir);  
+        spec = pow(max(dot(normal, halfwayDir), 0.0), 16.0);
+    }
+    else
+    {
+        vec3 reflectDir = reflect(-lightDir, normal);
+        spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0);
+    }
+}
+</code></pre>
+<p>  这里提供原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/1.advanced_lighting/advanced_lighting.cpp">Code</a>。<br>
+  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-Lighting/Advanced-Lighting">https://learnopengl.com/Advanced-Lighting/Advanced-Lighting</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglkang-ju-chi/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):抗锯齿
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

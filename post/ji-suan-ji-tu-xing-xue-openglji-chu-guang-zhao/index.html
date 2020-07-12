@@ -1,0 +1,353 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):基础光照 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):基础光照
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-05 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="基础光照">基础光照</h1>
+<p>  现实生活中的光照非常复杂，但我们可以通过一些简单的模型来进行模拟。其中一个比较有名的模型是Phong光照模型，主要的内容是将光照分为环境光(ambient)，漫反射光(diffuse)，高光(specular)，计算三者并将结果结合起来模拟最终的光照。<br>
+<img src="https://dragon-baby.github.io/post-images/1594478378665.png" alt="" loading="lazy"></p>
+<ul>
+<li>环境光：真实环境中，即使是夜晚，也会有一些诸如月光和反射光来影响光照，这类光照被统称为环境光，它的强度不会受到改变。</li>
+<li>漫反射光：这类光照往往是通过模拟太阳这种直射光来实现的，物体被照到的一面更亮，背光处更暗。</li>
+<li>高光：对于表面光滑的物体会存在高光，高光的颜色往往明显亮于其它种类的光照。</li>
+</ul>
+<h2 id="环境光">环境光</h2>
+<p>  光往往不来源于单一的光源，而是多个光源将光线散射到我们周围。光线可以散射和四处反射，这样会直接或间接影响物体的颜色。基于这种理论的算法是全局光照算法，但这里我们暂时将环境光模型考虑为单一的颜色，并降低它的光照强度来显得更为真实。比如我们在待渲染的立方体的片元着色器中这么定义：</p>
+<pre><code class="language-cpp">void main()
+{
+    float ambientStrength = 0.1;
+    vec3 ambient = ambientStrength * lightColor;
+
+    vec3 result = ambient * objectColor;
+    FragColor = vec4(result, 1.0);
+}  
+</code></pre>
+<p>  运行程序之后，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594478390663.png" alt="" loading="lazy"><br>
+  现在立方体有了一个基础的环境光颜色。</p>
+<h2 id="漫反射光照">漫反射光照</h2>
+<p>  环境光照的细节并不丰富，但添加漫反射光照后，物体的颜色信息就丰富了起来。我们想象一束直射光线：<br>
+<img src="https://dragon-baby.github.io/post-images/1594478400512.png" alt="" loading="lazy"><br>
+  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mover accent="true"><mi>N</mi><mo>⃗</mo></mover></mrow><annotation encoding="application/x-tex">\vec{N}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9663299999999999em;vertical-align:0em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9663299999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">N</span></span></span><span style="top:-3.25233em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.15216em;"><span class="overlay" style="height:0.714em;width:0.471em;"><svg width='0.471em' height='0.714em' style='width:0.471em' viewBox='0 0 471 714' preserveAspectRatio='xMinYMin'><path d='M377 20c0-5.333 1.833-10 5.5-14S391 0 397 0c4.667 0 8.667 1.667 12 5
+3.333 2.667 6.667 9 10 19 6.667 24.667 20.333 43.667 41 57 7.333 4.667 11
+10.667 11 18 0 6-1 10-3 12s-6.667 5-14 9c-28.667 14.667-53.667 35.667-75 63
+-1.333 1.333-3.167 3.5-5.5 6.5s-4 4.833-5 5.5c-1 .667-2.5 1.333-4.5 2s-4.333 1
+-7 1c-4.667 0-9.167-1.833-13.5-5.5S337 184 337 178c0-12.667 15.667-32.333 47-59
+H213l-171-1c-8.667-6-13-12.333-13-19 0-4.667 4.333-11.333 13-20h359
+c-16-25.333-24-45-24-59z'/></svg></span></span></span></span></span></span></span></span></span></span>代表该片段处的法线，若<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">θ</span></span></span></span>值越小，则对该片段的影响越大（即向量点积），反之越小。为了计算这一点积，我们需要该片段处的法线，以及光线的方向向量（灯光位置向量减去片段的位置向量）。</p>
+<h3 id="法线向量">法线向量</h3>
+<p>  由于我们定义的是顶点，那么这里的法线就是顶点法线，可以通过与周围的顶点找出一个平面来计算该顶点处的顶点法线。由于立方体并不复杂，这里我们就简单地给出顶点的法线属性：</p>
+<pre><code class="language-cpp">float vertices[] = {
+    //位置                  //法线
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5 f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+};
+</code></pre>
+<p>  修改顶点着色器：</p>
+<pre><code class="language-cpp">#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+out vec3 Normal;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    Normal = aNormal;
+} 
+</code></pre>
+<p>  同时记得修改顶点属性指针。(灯光立方体我们不使用法线属性)</p>
+<h3 id="计算漫反射颜色">计算漫反射颜色</h3>
+<p>  我们需要在片元着色器中定义灯光的位置：</p>
+<pre><code class="language-cpp">uniform vec3 lightPos;
+</code></pre>
+<p>  接着在渲染循环中赋值：</p>
+<pre><code class="language-cpp">lightingShader.setVec3(&quot;lightPos&quot;, lightPos);  
+</code></pre>
+<p>  接下来我们需要片元的位置，这个可以在顶点着色器中计算（通过将顶点的位置和model矩阵相乘）:</p>
+<pre><code class="language-cpp">out vec3 FragPos;  
+out vec3 Normal;
+  
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    FragPos = vec3(model * vec4(aPos, 1.0));
+    Normal = aNormal;
+}
+</code></pre>
+<p>  接着需要在片元着色其中计算漫反射光照对颜色的影响，首先要输入FragPos;</p>
+<pre><code class="language-cpp">in vec3 FragPos;
+</code></pre>
+<p>  接着标准化法线，并通过lightPos和FragPos相减来获得灯光的方向，并标准化：</p>
+<pre><code class="language-cpp">vec3 norm = normalize(Normal);
+vec3 lightDir = normalize(lightPos - FragPos);
+</code></pre>
+<p>  之后计算灯光方向和法线的点积来获得漫反射光照的影响度，当然不能小于0，即光线和法线的角度不能大于90度，我们通过max函数来限制大小：</p>
+<pre><code class="language-cpp">float diff = max(dot(norm, lightDir), 0.0);
+vec3 diffuse = diff * lightColor;
+</code></pre>
+<p>  最后，我们可以在结果颜色中添加漫反射光照的影响了：</p>
+<pre><code class="language-cpp">vec3 rsult = (ambient + diffuses) * objectColor;
+</code></pre>
+<p>  运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594478418669.png" alt="" loading="lazy"><br>
+  可以看到立方体的显示更为真实了。</p>
+<h3 id="存在的一些问题">存在的一些问题</h3>
+<p>之前我们将法线直接从顶点着色器传入了片元着色器，但由于片元着色器的光照计算在世界空间中，那么我们应该将model矩阵作用于法线来进行一些转换，但这里有一些问题。首先法线仅仅代表方向，并不代表确切的位置。其次，法线是三维向量，并没有w组件，所以model矩阵的平移将不会影响法线，也就是说我们要先舍弃model的第四个维度再与法线向量相乘。然后就是model矩阵中会包含非全局缩放，如果这样的话，法线与model矩阵相乘后将可能不再垂直于平面：<br>
+<img src="https://dragon-baby.github.io/post-images/1594478439635.png" alt="" loading="lazy"><br>
+  针对这些问题的解决方式是专门为法线定义model矩阵，做法是将原model矩阵的逆矩阵转置后降至3维：</p>
+<pre><code class="language-cpp">Normal = mat3(transpose(inverse(model))) * aNormal;
+</code></pre>
+<p>  注意，在着色器中计算逆矩阵开销很大，最好能后在CPU中计算好再送往着色器。</p>
+<h2 id="高光">高光</h2>
+<p>  类似于漫反射光照，高光的计算基于光线的方向和片段的法线，其次，还要加入视线的方向。高光的实际计算和反射光线、视线方向有关：<br>
+<img src="https://dragon-baby.github.io/post-images/1594478463255.png" alt="" loading="lazy"><br>
+  我们通过光线的方向和法线计算反射光线的方向，接着与视线方向作点积来计算高光影响。视线方向通过摄像机位置和片段位置作减法运算得到。（我们这里选择在世界空间中计算高光，当然也可以在视图空间中计算高光，在视图空间中计算的好处是摄像机的位置即观察者的位置永远在原点。）<br>
+  我们在片元着色器中添加观察位置：</p>
+<pre><code class="language-cpp">uniform vec3 viewPos;
+</code></pre>
+<p>  并将摄像机的位置赋予这个变量：</p>
+<pre><code class="language-cpp">lightingShader.setVec3(&quot;viewPos&quot;, camera.Position); 
+</code></pre>
+<p>  接着定义一个控制高光强度的参数：</p>
+<pre><code class="language-cpp">float specularStrength = 0.5;
+</code></pre>
+<p>  接着计算观察方向和反射光线方向（通过内建reflect函数计算）：</p>
+<pre><code class="language-cpp">vec3 viewDir = normalize(viewPos - FragPos);
+vec3 reflectDir = reflect(-lightDir, norm);  
+</code></pre>
+<p>  reflect函数要求第一个参数指向片段，所以我们反向灯光方向。<br>
+  接下来计算高光对颜色的影响：</p>
+<pre><code class="language-cpp">float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+vec3 specular = specularStrength * spec * lightColor; 
+</code></pre>
+<p>  pow方法中的32是反光度，用来控制高光的大小和范围：下面是一些不同反光度的效果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594478479593.png" alt="" loading="lazy"><br>
+  可以看到反光度越高，高光越亮，同时高光的范围更小。<br>
+  最后，我们加上高光的颜色影响：</p>
+<pre><code class="language-GLSL">vec3 result = (ambient + diffuse + specular) * objectColor;
+FragColor = vec4(result, 1.0);
+</code></pre>
+<p>  运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594478489200.png" alt="" loading="lazy"><br>
+  原文参考代码：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/2.lighting/2.2.basic_lighting_specular/basic_lighting_specular.cpp">code</a>。<br>
+  请多多参考原文：<a href="https://learnopengl.com/Lighting/Basic-Lighting">https://learnopengl.com/Lighting/Basic-Lighting</a>。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglyan-se/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):颜色
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):模型导入 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):模型导入
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-07 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="模型">模型</h1>
+<p>  在实际工作中，例如做游戏和作动画，我们并不会在程序中手动定义顶点、法线和纹理坐标，我们往往通过专门用来三维造型的软件来构建需要模型，例如maya,blender,3dmax。这些三维造型软件允许我们建立复杂的模型，并通过UV贴图赋予纹理，软件会自动生成顶点坐标、法线和纹理坐标，之后我们可以将所有的信息到处到一个文件中。市面上有许多主流的3d模型文件格式，比如obj，只存储模型的信息，不保留颜色信息，当然还有fbx,abc,collada等，每种格式的存储模型的信息和方式都是不同的。接下来我们会学习解析这种模型文件来导入模型。</p>
+<h1 id="assimp">Assimp</h1>
+<p>  一个非常有名的模型导入库为Assimp(open asset import library)。Assimp可以导入许多格式的模型文件并将数据存储在Assimp生成的数据结构中，然后我们就可以从该数据结构中获取我们需要的信息。当通过Assimp导入模型后，整个模型被导入名为scene的对象中。Assimp有一系列节点，用于存储scene对象中的不同数据的索引，每个节点又有任意数量的子节点。Assimp最简单的模型结构如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479283741.png" alt="" loading="lazy"></p>
+<ul>
+<li>所有的数据被存储在Scene对象中，例如材质和网格，同时也包含对所有根节点的引用。</li>
+<li>场景的根节点包含许多子节点，并包含由点构成网格的顺序索引，索引存储在mMeshes数组中。Scene对象的mMeshes数组包含真正的Mesh对象，而节点中的mMeshes数组只包含索引。</li>
+<li>一个Mesh对象包含所有渲染需要用到的数据，如顶点位置，法线向量，纹理坐标，面，材质。</li>
+<li>一个网格包含有几个面，而一个面代表一个可渲染的基本几何体（三角形，四边形，点）。一个面包含构成基本几何体的点的索引。由于点和它的索引是分离的，我们可以使用EBO来绘制基本几何体。</li>
+<li>最后一个网格也与一个Material对象链接，包含针对Scene对象的材质的索引。Material对象提供一些方法来重建一个对象的材质属性。<br>
+  整理一下思路，我们需要做的是：首先，将模型文件的数据导入到Scene对象中，再通过递归的方式检索每个节点相关的Mesh对象，通过处理Mesh对象我们获取它的顶点数据，索引和材质属性。最后我们得到一个模型对象，其中包含我们需要的所有网格数据。<br>
+  注意：在建模时，我们往往不会直接建立一个整体模型，而是分组件建立，例如一个人的模型，我们会将头和身子分开，然后创建头发，服装，小道具，最后组合起来。而这其中的每一个组件即一个网格，一个模型会包含多个网格。</li>
+</ul>
+<h2 id="编译assimp">编译Assimp</h2>
+<p>  和我们使用的其它的第三方库一样，我们会编译官方提供的源码来保证能够符合本机的环境。官网：<a href="http://assimp.org/index.php/downloads">http://assimp.org/index.php/downloads</a>。如有编译错误请参考官网：<a href="https://learnopengl.com/Model-Loading/Assimp">https://learnopengl.com/Model-Loading/Assimp</a>。</p>
+<h1 id="网格类">网格类</h1>
+<p>  通过Assimp，我们可以导入模型文件并将数据保存在Assimp特有的数据结构中，但我们需要将其转化为OpenGL可以使用的格式。上面我们说过，一个网格代表一个可绘制的实体，接下来我们创建自己的Mesh类。<br>
+  一个网格至少包含一系列的顶点，每个顶点包含一个坐标向量，一个法线向量，一个纹理坐标向量，一个网格同时也包含绘制的索引，包含纹理信息的材质数据。<br>
+  首先定义一个顶点的结构体，包含位置，法线，纹理坐标的属性：</p>
+<pre><code class="language-cpp">struct Vertex {
+    glm::vec3 Position;
+    glm::vec3 Normal;
+    glm::vec2 TexCoords;
+};
+</code></pre>
+<p>  同样，，我们想管理纹理数据，我们定义一个纹理的结构体：</p>
+<pre><code class="language-cpp">struct Texture {
+    unsigned int id;
+    string type;
+};  
+</code></pre>
+<p>  接下来构建我们的网格类：</p>
+<pre><code class="language-cpp">class Mesh{
+public:
+  // 网格数据
+  vector&lt;Vertex&gt; vertices;
+  vector&lt;unsigned int&gt; indices;
+  vector&lt;Texture&gt; textures;
+
+  //构造方法
+  Mesh(vector&lt;Vertex&gt; vertices, vector&lt;unsigned int&gt; indices, vector&lt;Texture&gt; textures);
+  // 绘制网格
+  void Draw(Shader shader);
+private:
+  // 缓冲对象
+  unsigned int VAO, VBO, EBO;
+  //初始化缓冲对象
+  void setupMesh();
+};
+</code></pre>
+<p>  实现构造方法：</p>
+<pre><code class="language-cpp">Mesh(vector&lt;Vertex&gt; vertices, vector&lt;unsigned int&gt; indices, vector&lt;Texture&gt; textures)
+{
+    this-&gt;vertices = vertices;
+    this-&gt;indices = indices;
+    this-&gt;textures = textures;
+
+    setupMesh();
+}
+</code></pre>
+<h2 id="初始化">初始化</h2>
+<p>  还是那么一套对于VAO,VBO,EBO的配置，我们来实现setupMesh方法：</p>
+<pre><code class="language-cpp">void setupMesh()
+{
+    glGenVertexArrays(1, &amp;VAO);
+    glGenBuffers(1, &amp;VBO);
+    glGenBuffers(1, &amp;EBO);
+  
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &amp;vertices[0], GL_STATIC_DRAW);  
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), 
+                 &amp;indices[0], GL_STATIC_DRAW);
+
+    // 顶点位置
+    glEnableVertexAttribArray(0);	
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    // 顶点法线
+    glEnableVertexAttribArray(1);	
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+    // 顶点纹理
+    glEnableVertexAttribArray(2);	
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+    glBindVertexArray(0);
+}  
+</code></pre>
+<p>  注意上面的代码，由于结构体的特性，属性在结构体中的排列是有顺序的，同时可以很方便的转化为数组来方便传入数组缓冲。比如我们定义一个顶点，并赋予属性，那么顺序如下：</p>
+<pre><code class="language-cpp">Vertex vertex;
+vertex.Position  = glm::vec3(0.2f, 0.4f, 0.6f);
+vertex.Normal    = glm::vec3(0.0f, 1.0f, 0.0f);
+vertex.TexCoords = glm::vec2(1.0f, 0.0f);
+// = [0.2f, 0.4f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f];
+</code></pre>
+<p>  因为这种特性，我们可以直接传入结构体指针作为缓冲数据：</p>
+<pre><code class="language-cpp">glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &amp;vertices[0], GL_STATIC_DRAW);  
+</code></pre>
+<p>  结构体的另一个特性是我们可以使用offset函数来获取偏移量。offset(s,m)的将结构体作为第一个参数， 第二个参数传入属性名。这个方法返回从结构体的初始位置到属性的位置计算的字节偏移量，我们在glVertexAttribPointer使用：</p>
+<pre><code class="language-cpp">glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+</code></pre>
+<h2 id="渲染">渲染</h2>
+<p>  接下来我们来实现Draw方法。由于我们不清除一个网格拥有多少种贴图，以及每种贴图有多少张，所以我们可以为纹理编号。如每个漫反射纹理被定义为：texture_diffuseN，高光纹理为：texture_specularN（N的最大值由OpenGL限制）。这样我们可以很方便的在着色器中这样定义纹理：</p>
+<pre><code class="language-GLSL">uniform sampler2D texture_diffuse1;
+uniform sampler2D texture_diffuse2;
+uniform sampler2D texture_diffuse3;
+uniform sampler2D texture_specular1;
+uniform sampler2D texture_specular2;
+</code></pre>
+<p>  接着就可以在Draw方法中为这些纹理赋予编号并激活和绑定纹理，然后绘制三角形：</p>
+<pre><code class="language-cpp">void Draw(Shader shader) 
+{
+    unsigned int diffuseNr = 1;
+    unsigned int specularNr = 1;
+    for(unsigned int i = 0; i &lt; textures.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i); // 在绑定前激活纹理
+        // 检索纹理编号
+        string number;
+        string name = textures[i].type;
+        if(name == &quot;texture_diffuse&quot;)
+            number = std::to_string(diffuseNr++);
+        else if(name == &quot;texture_specular&quot;)
+            number = std::to_string(specularNr++);
+
+        shader.setFloat((&quot;material.&quot; + name + number).c_str(), i);
+        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+    }
+
+    // 绘制网格
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}  
+</code></pre>
+<p>  在上述的方法中我们加入了material结构体来管理纹理。<br>
+  Mesh类的代码：<a href="https://learnopengl.com/code_viewer_gh.php?code=includes/learnopengl/mesh.h">Mesh.h</a>。</p>
+<h1 id="模型类">模型类</h1>
+<p>  接下来我们构建模型导入类。就像之前说的，一个模型包含若干网格，在模型类中我们会使用多个网格对象。<br>
+  下面是Model类的基础定义：</p>
+<pre><code class="language-cpp">class Model 
+{
+    public:
+        // 构造方法
+        Model(char *path)
+        {
+            loadModel(path);
+        }
+        // 绘制模型
+        void Draw(Shader shader);	
+    private:
+        // 模型数据（多个网格）
+        vector&lt;Mesh&gt; meshes;
+        string directory;
+        
+        // 导入模型
+        void loadModel(string path);
+        // 处理节点
+        void processNode(aiNode *node, const aiScene *scene);
+        // 处理网格对象
+        Mesh processMesh(aiMesh *mesh, const aiScene *scene);
+        // 导入材质纹理
+        vector&lt;Texture&gt; loadMaterialTextures(aiMaterial *mat, aiTextureType type, 
+                                             string typeName);
+};
+</code></pre>
+<p>  一个模型类包含一系列网格对象，构造方法要求文件的路径，接着通过构造方法中的loadModel方法导入模型。所有的private方法用来处理模型数据。<br>
+  Draw方法很简单，绘制所有的网格：</p>
+<pre><code class="language-cpp">void Draw(Shader shader)
+{
+    for(unsigned int i = 0; i &lt; meshes.size(); i++)
+        meshes[i].Draw(shader);
+}  
+</code></pre>
+<h2 id="导入3d模型到opengl">导入3D模型到OpenGL</h2>
+<p>  接下来我们要使用Assimp库：</p>
+<pre><code class="language-cpp">#include &lt;assimp/Importer.hpp&gt;
+#include &lt;assimp/scene.h&gt;
+#include &lt;assimp/postprocess.h&gt;
+</code></pre>
+<p>  我们来实现loadModel方法。就像之前说的，我们先将模型文件中的数据存储在Scene对象中：</p>
+<pre><code class="language-cpp">Assimp::Importer importer;
+const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs); 
+</code></pre>
+<p>  我们创建一个Importer对象来使用读取文件的ReadFile方法。该方法的一个参数要求一个文件路径，第二个参数要求一些后置处理选项。aiProcess_Trianglulate代表我们强制将所有的基本几何体转化为三角形。aiProcess_FlipUVs代表我们要反转y轴的纹理坐标，这是由于图片的原点在左上角，而OpenGL存储纹理的坐标原点在左下角。当然，还有以下几种后置处理命令：</p>
+<ul>
+<li>aiProcess_GenNoemals：如果模型不包含法线信息将为每个顶点创建法线。</li>
+<li>aiProcess_SplitLargeMeshes：将大的网格分割为若干个小的网格。如果网格的顶点数超出了渲染要求的最大顶点数，可以使用这个命令。</li>
+<li>aiProcess_OptimizeMeshes：这个命令尝试将一些网格合并为大的网格，来减少绘制次数。<br>
+  这里还有许多其它的assimp提供的后置处理命令：<a href="http://assimp.sourceforge.net/lib_html/postprocess_8h.html">post-processing</a>。<br>
+  完整的loadModel函数如下：</li>
+</ul>
+<pre><code class="language-cpp">void loadModel(string path)
+{
+    Assimp::Importer import;
+    const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);	
+	
+    if(!scene || scene-&gt;mFlags &amp; AI_SCENE_FLAGS_INCOMPLETE || !scene-&gt;mRootNode) 
+    {
+        cout &lt;&lt; &quot;ERROR::ASSIMP::&quot; &lt;&lt; import.GetErrorString() &lt;&lt; endl;
+        return;
+    }
+    directory = path.substr(0, path.find_last_of('/'));
+
+    processNode(scene-&gt;mRootNode, scene);
+}  
+</code></pre>
+<p>  在导入模型后我们检查场景和根节点是否为空，同时检查返回的数据是否不完整。我们接着检索文件所在的路径。如果没有问题的话我们就开始处理场景的节点，我们将根节点作为processNode的第一个参数，接着递归整个场景。<br>
+  注意，每个节点包含一系列网格索引，每个索引指向场景中的一个网格对象。因此我们检索这些网格索引，检索每个网格，处理每个网格，接着处理每个节点的子节点。在处理完所有节点后结束递归。下面是processNode的实现：</p>
+<pre><code class="language-cpp">void processNode(aiNode *node, const aiScene *scene)
+{
+    // 处理所有节点的网格
+    for(unsigned int i = 0; i &lt; node-&gt;mNumMeshes; i++)
+    {
+        aiMesh *mesh = scene-&gt;mMeshes[node-&gt;mMeshes[i]]; 
+        meshes.push_back(processMesh(mesh, scene));			
+    }
+    // then do the same for each of its children
+    for(unsigned int i = 0; i &lt; node-&gt;mNumChildren; i++)
+    {
+        processNode(node-&gt;mChildren[i], scene);
+    }
+}  
+</code></pre>
+<p>  我们首先检索每个节点的网格索引，然后检索相关的网格对象，并传入porcessMesh进行处理，并将结果存储到我们定义的成员变量meshes中。接着对所有的子节点做同样的操作，所有的节点被处理后结束递归。</p>
+<h3 id="将aimesh对象转化为我们定义的mesh对象">将aiMesh对象转化为我们定义的Mesh对象</h3>
+<p>  下面我们实现processMesh方法：</p>
+<pre><code class="language-cpp">Mesh processMesh(aiMesh *mesh, const aiScene *scene)
+{
+    vector&lt;Vertex&gt; vertices;
+    vector&lt;unsigned int&gt; indices;
+    vector&lt;Texture&gt; textures;
+
+    for(unsigned int i = 0; i &lt; mesh-&gt;mNumVertices; i++)
+    {
+        Vertex vertex;
+        // 处理顶点位置，法线，纹理坐标
+        ...
+        vertices.push_back(vertex);
+    }
+    // 处理索引
+    ...
+    // 处理材质
+    if(mesh-&gt;mMaterialIndex &gt;= 0)
+    {
+        ...
+    }
+
+    return Mesh(vertices, indices, textures);
+}  
+</code></pre>
+<p>  处理过程包含3部分，检索所有的顶点数据，检索索引，检索材质。检索数据存储在我们定义的三个变量中，我们组装为Mesh对象并作为返回值。<br>
+  处理顶点数据很简单，位置通过mesh-&gt;nVertices检索，法线通过mesh-&gt;mNormals检索，纹理通过mesh-&gt;mTextureCoords检索：<br>
+  顶点位置：</p>
+<pre><code class="language-cpp">glm::vec3 vector; 
+vector.x = mesh-&gt;mVertices[i].x;
+vector.y = mesh-&gt;mVertices[i].y;
+vector.z = mesh-&gt;mVertices[i].z; 
+vertex.Position = vector;
+</code></pre>
+<p>  顶点法线：</p>
+<pre><code class="language-cpp">vector.x = mesh-&gt;mNormals[i].x;
+vector.y = mesh-&gt;mNormals[i].y;
+vector.z = mesh-&gt;mNormals[i].z;
+vertex.Normal = vector;  
+</code></pre>
+<p>  纹理坐标，注意，Assimp允许模型至多由8种不同的纹理坐标，但我们只关心纹理集合的首元素是否含有纹理坐标：</p>
+<pre><code class="language-cpp">if(mesh-&gt;mTextureCoords[0]) // 判断纹理集的首元素是否由纹理坐标
+{
+    glm::vec2 vec;
+    vec.x = mesh-&gt;mTextureCoords[0][i].x; 
+    vec.y = mesh-&gt;mTextureCoords[0][i].y;
+    vertex.TexCoords = vec;
+}
+else
+    vertex.TexCoords = glm::vec2(0.0f, 0.0f);  
+</code></pre>
+<h4 id="索引">索引</h4>
+<p>  接着我们处理索引。Assimp种，每个网包含一系列面，每个面代表一个基本几何体，在这里我们设置的是三角形。一个面包含绘制面的点的索引。所以我们检索所有的面然后存储每个面的索引：</p>
+<pre><code class="language-cpp">for(unsigned int i = 0; i &lt; mesh-&gt;mNumFaces; i++)
+{
+    aiFace face = mesh-&gt;mFaces[i];
+    for(unsigned int j = 0; j &lt; face.mNumIndices; j++)
+        indices.push_back(face.mIndices[j]);
+}  
+</code></pre>
+<h4 id="材质">材质</h4>
+<p>  和节点一样，一个网格只包含对材质对象的索引。为了检索网格的材质，我们需要场景mMaterials数组的索引，这被存储在mMaterialIndex属性中。我们首先确定网格是否包含材质信息：</p>
+<pre><code class="language-cpp">if(mesh-&gt;mMaterialIndex &gt;= 0)
+{
+    aiMaterial *material = scene-&gt;mMaterials[mesh-&gt;mMaterialIndex];
+    vector&lt;Texture&gt; diffuseMaps = loadMaterialTextures(material, 
+                                        aiTextureType_DIFFUSE, &quot;texture_diffuse&quot;);
+    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+    vector&lt;Texture&gt; specularMaps = loadMaterialTextures(material, 
+                                        aiTextureType_SPECULAR, &quot;texture_specular&quot;);
+    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+}  
+</code></pre>
+<p>  我们通过索引从场景的mMaterials数组中获取aiMaterial对象，其中包含网格的材质信息，即每种纹理的位置。接着我们从aiMaterial对象中加载纹理。我们通过loadMaterialTextures方法来实现。<br>
+  loadMaterialTextures基于纹理类型检索所有的纹理位置，并检索所有的纹理文件位置，然后加载和生成纹理并保存在Vertex结构体中：</p>
+<pre><code class="language-cpp">vector&lt;Texture&gt; loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
+{
+    vector&lt;Texture&gt; textures;
+    for(unsigned int i = 0; i &lt; mat-&gt;GetTextureCount(type); i++)
+    {
+        aiString str;
+        mat-&gt;GetTexture(type, i, &amp;str);
+        Texture texture;
+        texture.id = TextureFromFile(str.C_Str(), directory);
+        texture.type = typeName;
+        texture.path = str;
+        textures.push_back(texture);
+    }
+    return textures;
+}  
+</code></pre>
+<p>  我们通过GetTextureCount来获取某一种纹理的数量。接着通过GetTexture方法检索每个纹理文件的位置并存储在一个aiString类型的变量中。接着我们使用TextureFromFile（stb_image.h的方法）来加载纹理文件并返回纹理ID。<br>
+  注意，这里我们假设模型的纹理文件保存在和模型的相同目录中，我们可以改变directory来获取任意路径下的纹理文件。</p>
+<h2 id="优化">优化</h2>
+<p>  现在仍存在一个问题，即一张纹理可能会有多个网格对象使用。所以我们这样优化一下代码：我们全局存储所有导入的纹理，接着每次导入纹理的时候，我们先检测纹理是否已经导入；如果是，我们跳过所有的导入步骤并使用对应的纹理。<br>
+  我们先为Texture结构体添加文件路径属性：</p>
+<pre><code class="language-cpp">struct Texture {
+    unsigned int id;
+    string type;
+    string path;  
+};
+</code></pre>
+<p>  接着，定义一个变量存储所有导入了的纹理：</p>
+<pre><code class="language-cpp">vector&lt;Texture&gt; textures_loaded; 
+</code></pre>
+<p>  在loadMaterialTextures方法中，我们比较纹理文件的路径来判断纹理是否复用。如果是，则跳过纹理导入和生成步骤，并使用对应已生成的纹理。修改过的方法如下：</p>
+<pre><code class="language-cpp">vector&lt;Texture&gt; loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
+{
+    vector&lt;Texture&gt; textures;
+    for(unsigned int i = 0; i &lt; mat-&gt;GetTextureCount(type); i++)
+    {
+        aiString str;
+        mat-&gt;GetTexture(type, i, &amp;str);
+        bool skip = false;
+        for(unsigned int j = 0; j &lt; textures_loaded.size(); j++)
+        {
+            if(std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
+            {
+                textures.push_back(textures_loaded[j]);
+                skip = true; 
+                break;
+            }
+        }
+        if(!skip)
+        {   
+            // 如果纹理文件没有导入，则导入并生成纹理
+            Texture texture;
+            texture.id = TextureFromFile(str.C_Str(), directory);
+            texture.type = typeName;
+            texture.path = str.C_Str();
+            textures.push_back(texture);
+            textures_loaded.push_back(texture); // 添加到已导入纹理队列
+        }
+    }
+    return textures;
+}  
+</code></pre>
+<p>  最终模型类的代码参考在这里：<a href="https://learnopengl.com/code_viewer_gh.php?code=includes/learnopengl/model.h">Model.h</a>。<br>
+  最后，我们就可以使用模型类导入复杂的模型来丰富我们的场景了。请多多关注原文：<a href="https://learnopengl.com/Model-Loading/Model">https://learnopengl.com/Model-Loading/Model</a>。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglduo-guang-yuan/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):多光源
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

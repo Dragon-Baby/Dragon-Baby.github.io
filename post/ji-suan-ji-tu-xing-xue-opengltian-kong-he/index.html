@@ -1,0 +1,403 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):天空盒 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):天空盒
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-09 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="立方体贴图">立方体贴图</h1>
+<p>  立方体贴图是一张包含6个不同2D纹理的纹理，每个独立的纹理应用在一个立方体的每个面上。这样的立方体贴图的作用是什么？我们可以使用一个方向向量进行采样。想象一个<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>1</mn><mo>×</mo><mn>1</mn><mo>×</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">1\times1\times1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>的立方体，方向向量坐落于中心原点，用该方向向量采样纹理值就像下面这样：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480598020.png" alt="" loading="lazy"><br>
+  如果有这么一个应用了立方体贴图的立方体，那这个方向向量就类似于立方体的顶点位置。这样我们就可以使用顶点位置向量来进行立方体贴图采样。因此，在贴图采样时，可以将立方体的顶点坐标作为纹理坐标使用，这样就可以得到对应于立方体贴图的每个独立面的纹理坐标。</p>
+<h2 id="创建立方体贴图">创建立方体贴图</h2>
+<p>  和普通的纹理对象一样，我们使用glGenTextures和glBindTexture来创建和绑定立方体纹理对象，但我们将类别改为GL_TEXTURE_CUBE_MAP:</p>
+<pre><code class="language-cpp">unsigned int textureID;
+glGenTexture(1, &amp;textureID);
+glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+</code></pre>
+<p>  由于立方体贴图包含6张纹理，我们需要调用6次glTexImage2D来生成纹理数据。OpenGL为立方体贴图设置了特定的纹理目标，代表6个面的方位：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480609865.png" alt="" loading="lazy"><br>
+  我们可以事先定义好纹理文件的顺序，按下面的方式遍历：</p>
+<pre><code class="language-cpp">int width, height, nrChannels;
+unsigned char *data;
+for(GLuint i = 0; i &lt; texture_faces.size(); i++)
+{
+  data = stbi_load(textures_faces[i].c_str(), &amp;width, &amp;height, &amp;nrChannels, 0);
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+        0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+}
+</code></pre>
+<p>  立方体贴图的每个面的在枚举定义中使用顺序的，所以我们从GL_TEXTURE_CUBE_MAP_POSITIVE_X出发，每次+1。<br>
+  和其它的纹理一样，我们为立方体贴图设置相关滤镜和映射方式（扩展到了3维，STR）:</p>
+<pre><code class="language-cpp">glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
+</code></pre>
+<p>  设置映射方式时，我们使用GL_CLAMP_TO_EDGE来保证面与面之间的边不会有奇怪的采样值。<br>
+  和普通的2d纹理一样，在渲染物体前激活并绑定纹理。<br>
+  针对立方体贴图我们额外创建新的着色器。在片元着色器中，我们使用新的采样方式samplerCube来定义立方体贴图。这里，我们不再使用2维纹理坐标，而是使用vec3定义：</p>
+<pre><code class="language-GLSL">in vec3 textureDir; // 方向向量代表纹理坐标
+uniform samplerCube cubemap; // 立方体贴图采样器
+void main()
+{             
+    FragColor = texture(cubemap, textureDir);
+}  
+</code></pre>
+<p>  立方体贴图就介绍到这里。针对立方体贴图的一个应用就是创建天空盒。</p>
+<h1 id="天空盒">天空盒</h1>
+<p>  天空盒是一个使用立方体贴图技术来展现整个场景的立方体，可以给玩家一种世界很大的感觉（其实场景不大），比如上古卷轴3的星空：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480625428.jpg" alt="" loading="lazy"><br>
+  构成天空盒的6张纹理大概是像这样：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480635930.png" alt="" loading="lazy"></p>
+<h2 id="加载天空盒">加载天空盒</h2>
+<p>  我们使用立方体贴图来实现天空盒，所以加载纹理的方式就和上述一致。不过我们将代码封装起来实现一个方法，传入纹理所在的vector位置：</p>
+<pre><code class="language-cpp">unsigned int loadCubemap(vector&lt;std::string&gt; faces)
+{
+    unsigned int textureID;
+    glGenTextures(1, &amp;textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i &lt; faces.size(); i++)
+    {
+        unsigned char *data = stbi_load(faces[i].c_str(), &amp;width, &amp;height, &amp;nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+                         0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+            );
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout &lt;&lt; &quot;Cubemap tex failed to load at path: &quot; &lt;&lt; faces[i] &lt;&lt; std::endl;
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    return textureID;
+}  
+</code></pre>
+<p>  方法返回配置好的天空盒纹理对象。<br>
+  我们使用上面那6张纹理图片构成天空盒，定义一个vector，并使用上面的方法创建纹理：</p>
+<pre><code class="language-cpp">vector&lt;std::string&gt; faces;
+{
+    &quot;right.jpg&quot;,
+    &quot;left.jpg&quot;,
+    &quot;top.jpg&quot;,
+    &quot;bottom.jpg&quot;,
+    &quot;front.jpg&quot;,
+    &quot;back.jpg&quot;
+};
+unsigned int cubemapTexture = loadCubemap(faces);  
+</code></pre>
+<h2 id="绘制天空盒">绘制天空盒</h2>
+<p>  由于天空盒也是一个立方体，这里我们定义它的顶点数据(只需定义位置，我们使用位置来映射纹理)，并创立VAO，VBO。<br>
+  我们让天空盒保持在原点，顶点着色器的定义非常简单：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+
+out vec3 TexCoords;  // 注意是三维纹理坐标
+
+uniform mat4 projection;
+uniform mat4 view;
+
+void main()
+{
+    TexCoords = aPos;  //使用顶点位置作为方向向量来映射纹理
+    gl_Position = projection * view * vec4(aPos, 1.0);
+}  
+</code></pre>
+<p>  片元着色器的配置也很简单，我们传入三维纹理坐标，定义天空盒的采样器(sanmplerCube类型):</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+
+in vec3 TexCoords;
+
+uniform samplerCube skybox;
+
+void main()
+{    
+    FragColor = texture(skybox, TexCoords);
+}
+</code></pre>
+<p>  那么接下来我们在渲染循环中，激活天空盒纹理并绑定，接着绘制天空盒。由于我们将天空盒的内容作为背景显示，所以我们首先绘制天空盒并禁止深度缓冲写入（天空盒是<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>1</mn><mo>×</mo><mn>1</mn><mo>×</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">1 \times1 \times1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>的立方体，不这么做会在场景中显示为一个正常的立方体）：</p>
+<pre><code class="language-cpp">glDepthMask(GL_FALSE);
+skyboxShader.use();
+// ... 设置天空盒的view和projection矩阵
+glBindVertexArray(skyboxVAO);
+glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+glDrawArrays(GL_TRIANGLES, 0, 36);
+glDepthMask(GL_TRUE);
+// ... 绘制剩余的物体
+</code></pre>
+<p>  但如果就这么运行程序会发现一个问题。我们想让天空盒在正中心，无论观察者如何接近，天空盒的显示都不会变大。但当前的view矩阵将会改变天空盒的位置，所以观察者移动时，天空盒也会移动。为了达成这一目的，我们将view矩阵降维处理来移除影响移动的部分：</p>
+<pre><code class="language-cpp">glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));  
+</code></pre>
+<p>  最后的结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480652356.png" alt="" loading="lazy"></p>
+<h3 id="优化">优化</h3>
+<p>  我们现在在渲染中是先绘制天空盒再绘制其它物体，但这样效率并不高。如果我们先绘制天空盒的话，屏幕上的每一个天空盒的像素都会运行片元着色器，但之后的物体会遮挡一部分像素，造成资源浪费。为解决这一问题，我们可以使用提前深度测试来尽早丢弃这些不会显示的片段。<br>
+  为提升性能，我们最后绘制天空盒，这样，深度缓冲中保存这场景中所有物体的深度，我们就可以只绘制通过提前深度测试的天空盒片段。但问题是，由于天空盒是单元立方体，大多数片段可能都不会通过深度测试。如果关闭深度测试绘制天空盒也不是一个办法，因为天空盒将会覆盖场景中所有的物体。我们需要让深度缓冲知道天空盒的深度一直是1，这样只要有物体在天空盒前面，天空盒就会无法通过深度测试。<br>
+  在之前的章节我们提到，透视除法在顶点着色器运行后执行，将gl_Position中的xyz坐标与w坐标相除。我们也提到透视除法后z坐标被充当为深度值。因此，我们可以将gl_Position的z坐标的值设为w坐标的值，这样在进行透视除法后，被充当深度值的z坐标将永远为1。我们这样修改天空盒的顶点着色器：</p>
+<pre><code class="language-GLSL">void main()
+{
+    TexCoords = aPos;
+    vec4 pos = projection * view * vec4(aPos, 1.0);
+    gl_Position = pos.xyww;
+}  
+</code></pre>
+<p>  同时，我们将深度测试的选项改为GL_LEQUAL，对于天空盒，深度缓冲中的值会被设为1，所以我们需要设为≤来保证天空盒可以通过深度测试。<br>
+  原文参考代码：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/6.1.cubemaps_skybox/cubemaps_skybox.cpp">Code</a>。</p>
+<h1 id="环境映射">环境映射</h1>
+<p>  我们可以使用立方体贴图来为环境中的物体添加环境反射和折射效果，这一技术被称为环境映射。</p>
+<h2 id="反射">反射</h2>
+<p>  下图展示了如何计算反射向量，并使用这一向量来采样立方体纹理：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480668016.png" alt="" loading="lazy"><br>
+  我们基于法线和视线方向来计算反射向量。<br>
+  我们选取一个立方体来实现这一效果。在它的片元着色器中我们使用reflect方法计算反射向量，并将反射向量作为纹理坐标映射天空盒纹理：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+
+in vec3 Normal;
+in vec3 Position;
+
+uniform vec3 cameraPos;
+uniform samplerCube skybox;
+
+void main()
+{             
+    vec3 I = normalize(Position - cameraPos);
+    vec3 R = reflect(I, normalize(Normal));
+    FragColor = vec4(texture(skybox, R).rgb, 1.0);
+}
+</code></pre>
+<p>  由于定义了法线，我们像往常一样定义这个立方体的顶点着色器：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+
+out vec3 Normal;
+out vec3 Position;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+    Normal = mat3(transpose(inverse(model))) * aNormal;
+    Position = vec3(model * vec4(aPos, 1.0));
+    gl_Position = projection * view * vec4(Position, 1.0);
+}  
+</code></pre>
+<p>  在设置后所有常规在操作后，记得在绘制立方体前绑定天空盒的纹理：</p>
+<pre><code class="language-cpp">glBindVertexArray(cubeVAO);
+glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);  		
+glDrawArrays(GL_TRIANGLES, 0, 36);	
+</code></pre>
+<p>  运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480687635.png" alt="" loading="lazy"></p>
+<h2 id="折射">折射</h2>
+<p>  另一种环境映射的方式为折射，方式如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480699040.png" alt="" loading="lazy"><br>
+  和反射一样，重点在于计算折射向量R。基于每种介质的折射系数我们可以算出从一个介质进入另一个介质的光的折射率。下面给出一些常见的介质的折射系数：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480712209.png" alt="" loading="lazy"><br>
+  我们想让立方体呈现玻璃的效果，即从空气进入玻璃的折射效果。我们可以使用GLSL内建的refract函数来简单地计算折射向量，片元着色器main方法如下：</p>
+<pre><code class="language-GLSL">void main()
+{             
+    float ratio = 1.00 / 1.52;
+    vec3 I = normalize(Position - cameraPos);
+    vec3 R = refract(I, normalize(Normal), ratio);
+    FragColor = vec4(texture(skybox, R).rgb, 1.0);
+}  
+</code></pre>
+<p>  运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594480722859.png" alt="" loading="lazy"></p>
+<p>  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-OpenGL/Cubemaps">https://learnopengl.com/Advanced-OpenGL/Cubemaps</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglzheng-huan-chong/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):帧缓冲
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,521 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):SSAO | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):SSAO
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-16 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>  我们在介绍光照的时候曾经接触过环境光光照，我们用一个常量来模拟，但实际上，光是向四面八方散射的，场景中的每个物体都会或多或少的受到影响。一种近似模拟这种真实的环境光的技术时环境光遮蔽，这个技术通过将接缝、空洞、很接近的表面变暗来尽量区模拟非直接光照带来的影响。上述这些区域被周围的几何体大范围的遮挡，光基本照不到，就会形成比较暗的区域。观察一下自己的四周就会法线的确有以下稍微暗一点的区域。<br>
+  下面是一组使用环境光遮蔽和没有使用的对比：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484010669.png" alt="" loading="lazy"><br>
+  上面图片中，使用了环境光遮蔽的图片会发现在某些区域变得较暗，给场景增加了更丰富的细节，让物体间的空间分布更为明显。<br>
+  不过环境光遮蔽的技术计算开销很大，因为需要将周围的几何体都考虑在内。在2007年，crytek游戏开发商提出了屏幕空间环境光遮蔽(screen-space ambient occlusion)的技术，简称SSAO，并将这一技术运用到孤岛危机的游戏中。这个技术使用屏幕空间的一个屏幕深度缓冲来决定遮蔽的数量，而不使用场景中真实的几何数据。对比真实环境光遮蔽，这一技术大大降低了运算开销而且也能给出比较好的结果，非常适合用于模拟环境光遮蔽。<br>
+  SSAO的原理很简单：对于绘制在屏幕平面上的每个片段，我们基于其周围的片段的深度值计算出一个遮蔽因数，这个遮蔽因数被用来减少或取消片段的环境光照组件的影响。这一遮蔽因数可以通过一个围绕片段的一个球形核心来进行多重深度采样，并比较当前中心片段的深度值和采样的深度值来得到。高于当前片段深度值的采样数量就代表遮蔽因数。<br>
+<img src="https://dragon-baby.github.io/post-images/1594484025972.png" alt="" loading="lazy"><br>
+  上图中，灰色的采样点将用来计算总的遮蔽因数，这样的采样点越多，片段所接收到的环境光就越少。<br>
+  通过上面的原理陈述，我们可以明白决定环境光遮蔽效果的质量和精度的要素在于球形区域内采样点的数量，如果采样点数量太低，精度会非常低，最后结果就是一种条带感(banding)；如果采样点数量太高，我们就增大了计算的开销。我们可以通过对球形核心增加一些随机度来减少采样的数量，通过随机旋转每个片段的采样核心我们也可以只使用很少数量的采样点来获取比较高质量的结果。当然，这样获得的结果也会因为随机而产生一些视觉上的问题，我们还需要对结果进行模糊处理。下面是一组对比：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484042471.jpg" alt="" loading="lazy"><br>
+  可以看到，使用低采样数量会造成条带感，但通过随机旋转采样核心，还是可以得到比较高质量的效果。<br>
+  Crytek的SSAO技术有自己独特的视觉效果，因为他们使用的采样核心是一个球，这样的话，扁平的墙面也会有一些灰色的感觉（球形核心中大致会有一半的采样点用于计算环境光遮蔽），下面是一个例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484058461.jpg" alt="" loading="lazy"><br>
+  这里我们不想实现这种灰蒙蒙的感觉，所以我们不使用球形采样核心，而是使用沿平面法线方向的半球形采样核心：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484074737.png" alt="" loading="lazy"><br>
+  这样的话就可以移除那种灰度感的环境光遮蔽效果，可以生成更为真实的效果。</p>
+<h2 id="采样缓冲">采样缓冲</h2>
+<p>  SSAO需要一些几何信息来决定一个片段的遮蔽因数，对每个片段，我们需要下面的数据：</p>
+<ul>
+<li>每个片段的位置</li>
+<li>每个片段的法线</li>
+<li>每个片段的反照率颜色（即漫反射）</li>
+<li>一个采样核心</li>
+<li>一个随机旋转向量来旋转采样核心<br>
+  使用每个片段的视图空间位置我们可以绕片段的视图空间法线来旋转半球形采样核心，使用这个核心来采样不同偏移的位置缓冲纹理。对每个片段的核心采样，我们将其深度和位置缓冲种的深度进行比较来决定遮蔽的程度。接着遮蔽因数用来限制最后的环境光组件。通过是对每个片段的采样核心使用旋转向量我们也可以减少采样次数。<br>
+<img src="https://dragon-baby.github.io/post-images/1594484091735.png" alt="" loading="lazy"><br>
+  因为SSAO是一个屏幕空间的技术，我们会在屏幕平面上的每个片段上计算效果，所以这也意味着我们没有场景中的几何信息，因此我们需要将几何信息渲染到屏幕空间纹理中，接着传到SSAO的着色器中，这样就可以使用屏幕空间每个片段的几何信息了。已经很明了了，我们可以使用上一章延后渲染的G缓冲来帮助我们实现这一点。<br>
+  因为我们需要每个片段的位置和法线信息，在片元着色器的开头定义这几个颜色缓冲来存储信息：</li>
+</ul>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) out vec4 gPosition;
+layout (location = 1) out vec3 gNormal;
+layout (location = 2) out vec4 gAlbedoSpec;
+
+in vec2 TexCoords;
+in vec3 FragPos;
+in vec3 Normal;
+
+void main()
+{    
+    // store the fragment position vector in the first gbuffer texture
+    gPosition = FragPos;
+    // also store the per-fragment normals into the gbuffer
+    gNormal = normalize(Normal);
+    // and the diffuse per-fragment color, ignore specular
+    gAlbedoSpec.rgb = vec3(0.95);
+}  
+</code></pre>
+<p>  由于SSAO是屏幕空间技术，遮蔽是通过观察者视角计算的，所以在视图空间实现算法是很合理的。因此，FragPos和Normal这些在顶点着色器计算的数据需要转换到视图空间。</p>
+<blockquote>
+<p>  通过深度值来重建位置向量是可行的，这篇<a href="https://mynameismjp.wordpress.com/2010/09/05/position-from-depth-3/">博客</a>中介绍了这一方法。虽然需要在着色器中进行额外的计算，但可以节省大量内存（本来在G缓冲中存储位置就是很耗内存的）。不过例子简单的话就不用考虑这些。</p>
+</blockquote>
+<p>  设置纹理用来存储几何数据，这里只展示位置：</p>
+<pre><code class="language-cpp">glGenTextures(1, &amp;gPosition);
+glBindTexture(GL_TEXTURE_2D, gPosition);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);  
+</code></pre>
+<p>  注意我们使用了GL_RGBA16F，因为我们需要更高的精度。同时纹理映射方式为GL_CLAMP_TO_EDGE，这保证了我们不会过采样。</p>
+<h2 id="沿法线的半球">沿法线的半球</h2>
+<p>  我们需要生成一个沿法线方向的半球形采样核心，这里我们将在切线空间生成这个半球（法线都指向+z轴），以免为每个平面都单独生成一个沿各自法线方向的半球。<br>
+<img src="https://dragon-baby.github.io/post-images/1594484127289.png" alt="" loading="lazy"><br>
+  假设我们有一个单位半球，我们可以像下面这样得到一个拥有最大采样数为64的采样核心：</p>
+<pre><code class="language-cpp">std::uniform_real_distribution&lt;float&gt; randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
+std::default_random_engine generator;
+std::vector&lt;glm::vec3&gt; ssaoKernel;
+for (unsigned int i = 0; i &lt; 64; ++i)
+{
+    glm::vec3 sample(
+        randomFloats(generator) * 2.0 - 1.0, 
+        randomFloats(generator) * 2.0 - 1.0, 
+        randomFloats(generator)
+    );
+    sample  = glm::normalize(sample);
+    sample *= randomFloats(generator);
+    ssaoKernel.push_back(sample);  
+}
+</code></pre>
+<p>  我们将切线空间的x、y坐标限制在[-1,1]间，z坐标限制在[0,1]之间(即一个沿法线方向的半球)。<br>
+  不过这里生成的64个采样点是随机分布的，我们希望采样点更倾向于接近核心的片段，我们可以在上面的循环中添加下面的代码：</p>
+<pre><code class="language-cpp"> float scale = (float)i / 64.0; 
+   scale   = lerp(0.1f, 1.0f, scale * scale);
+   sample *= scale;
+   ssaoKernel.push_back(sample);  
+}
+</code></pre>
+<p>  lerp是线性插值，是这样定义的：</p>
+<pre><code class="language-cpp">float lerp(float a, float b, float f)
+{
+    return a + f * (b - a);
+}  
+</code></pre>
+<p>  这样的采样点会更倾向于接近中心片段：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484154920.png" alt="" loading="lazy"><br>
+  接下来为每个核心添加一些随机的旋转或噪声。</p>
+<h2 id="随机核心旋转">随机核心旋转</h2>
+<p>  我们将每个核心的随机旋转存储在纹理中。<br>
+  首先创建一个4*4阵列的随即旋转向量，绕着切线空间的法线：</p>
+<pre><code class="language-cpp">std::vector&lt;glm::vec3&gt; ssaoNoise;
+for (unsigned int i = 0; i &lt; 16; i++)
+{
+    glm::vec3 noise(
+        randomFloats(generator) * 2.0 - 1.0, 
+        randomFloats(generator) * 2.0 - 1.0, 
+        0.0f); 
+    ssaoNoise.push_back(noise);
+}  
+</code></pre>
+<p>  接着创建一张4*4的纹理来存储这些向量，将映射方式这位GL_REPEAT来保证覆盖整个屏幕：</p>
+<pre><code class="language-cpp">unsigned int noiseTexture; 
+glGenTextures(1, &amp;noiseTexture);
+glBindTexture(GL_TEXTURE_2D, noiseTexture);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGB, GL_FLOAT, &amp;ssaoNoise[0]);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
+</code></pre>
+<h2 id="ssao着色器">SSAO着色器</h2>
+<p>  SSAO着色器在2D屏幕平面上运行，为上面的每个片段计算遮蔽值。我们创建一个SSAO帧缓冲：</p>
+<pre><code class="language-cpp">unsigned int ssaoFBO;
+glGenFramebuffers(1, &amp;ssaoFBO);  
+glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+  
+unsigned int ssaoColorBuffer;
+glGenTextures(1, &amp;ssaoColorBuffer);
+glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer, 0); 
+</code></pre>
+<p>  因为环境光遮蔽是一个单通道的灰度值，所以我们的颜色缓冲纹理只需要1个通道即可。我们使用GL_RED。<br>
+  使用SSAO的渲染流程应该如下：</p>
+<pre><code class="language-cpp">// 几何阶段：将所有要用的几何数据渲染到G缓冲的纹理中
+glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    [...]
+glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+  
+// 使用G缓冲中的几何数据将遮蔽因数渲染到SSAO纹理中
+glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+    glClear(GL_COLOR_BUFFER_BIT);    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, noiseTexture);
+    shaderSSAO.use();
+    SendKernelSamplesToShader();
+    shaderSSAO.setMat4(&quot;projection&quot;, projection);
+    RenderQuad();
+glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  
+// 光照阶段：渲染场景光照
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+shaderLightingPass.use();
+[...]
+glActiveTexture(GL_TEXTURE3);
+glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+[...]
+RenderQuad();  
+</code></pre>
+<p>  shaderSSAO需要输入相关的G缓冲纹理，随机旋转纹理以及半球形采样核心：</p>
+<pre><code class="language-GLSL">#version 330 core
+out float FragColor;
+  
+in vec2 TexCoords;
+
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D texNoise;
+
+uniform vec3 samples[64];
+uniform mat4 projection;
+
+// tile noise texture over screen, based on screen dimensions divided by noise size
+const vec2 noiseScale = vec2(1280.0/4.0, 720.0/4.0); // screen = 1280x720
+
+void main()
+{
+    [...]
+</code></pre>
+<p>  我们这里设置随机纹理坐标的缩放noiseScale。</p>
+<pre><code class="language-GLSL">vec3 fragPos   = texture(gPosition, TexCoords).xyz;
+vec3 normal    = texture(gNormal, TexCoords).rgb;
+vec3 randomVec = texture(texNoise, TexCoords * noiseScale).xyz;  
+</code></pre>
+<p>  由于我们使用了屏幕缩放等级，随机值会覆盖整个屏幕。接着使用fragPos和normal向量，我们可以创建TBN矩阵：</p>
+<pre><code class="language-GLSL">vec3 tangent   = normalize(randomVec - normal * dot(randomVec, normal));
+vec3 bitangent = cross(normal, tangent);
+mat3 TBN       = mat3(tangent, bitangent, normal);  
+</code></pre>
+<p>  使用Gramm-Schmidt方法我们可以创建正交的TBN矩，同时使用randomVec进行偏移。注意因为我们使用的是随机向量来构造切线，所以没有必要百分百让矩阵完美地和平面贴合。<br>
+  接着我们遍历每个核心采样，将采样从切线空间转化到视图空间，接着进行深度对比：</p>
+<pre><code class="language-GLSL">float occlusion = 0.0;
+for(int i = 0; i &lt; kernelSize; ++i)
+{
+    // 获取采样位置
+    vec3 sample = TBN * samples[i]; // 从切线空间转化到视图空间
+    sample = fragPos + sample * radius; 
+    
+    [...]
+}  
+</code></pre>
+<p>  这里的kernelSize和radius是用来调整效果的参数，这里设置为64和0.5。我们将计算的采样位置进行调整后作为偏移添加到fragPos。<br>
+  接着我们将smple移动到屏幕空间，这样我们就可以采样sample的深度值。我们使用projection将其转化到切割空间：</p>
+<pre><code class="language-GLSL">vec4 offset = vec4(sample, 1.0);
+offset      = projection * offset;    // 从视图到切割
+offset.xyz /= offset.w;               // 透视除法
+offset.xyz  = offset.xyz * 0.5 + 0.5; // 范围到0.0 - 1.0  
+</code></pre>
+<p>  接着使用偏移来采样G缓冲中的位置的z值来作为采样的深度：</p>
+<pre><code class="language-GLSL">float sampleDepth = texture(gPosition, offset.xy).z; 
+</code></pre>
+<p>  接着我们将当前的采样深度值和存储的深度值进行比较，如果大一些的话，添加遮蔽因数的影响：</p>
+<pre><code class="language-GLSL">occlusion += (sampleDepth &gt;= sample.z + bias ? 1.0 : 0.0); 
+</code></pre>
+<p>  添加bias可以帮助调整环境光遮蔽的效果，也可以解决痤疮问题。<br>
+  这里还存在一个问题，当一个用来测试环境光遮蔽的片段靠近一个平面的边缘时，这个平面会被当做远在测试片段的平面之后，这些值会参与计算遮蔽因数，我们可以通过范围检查来解决这一问题。<br>
+<img src="https://dragon-baby.github.io/post-images/1594484177325.png" alt="" loading="lazy"><br>
+  我们用范围检查来确保某一片段的深度值在采样半径内，这样才会对遮蔽因数做贡献。我们修改上面着色器的代码：</p>
+<pre><code class="language-GLSL">float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - sampleDepth));
+occlusion       += (sampleDepth &gt;= sample.z + bias ? 1.0 : 0.0) * rangeCheck;         
+</code></pre>
+<p>  这里使用了GLSL自带的smoothstep方法，将第三个参数的值在前两个参数的范围内平滑插值，如果值小于或等于第一个参数则返回0，大于或等于第一个参数则返回1。如果深度值接近采样半径，将会得到非常平滑的值，下面是曲线：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484189005.png" alt="" loading="lazy"><br>
+  如果不使用这种方法直接抛弃范围外的值的话，会让结果非常不自然。<br>
+  最后的最后，我们使用这一遮蔽参数计算最终的颜色。我们将其除以采样数的大小来标准化因数，接着用1减去表明，因数越大越黑：</p>
+<pre><code class="language-GLSL">}
+occlusion = 1.0 - (occlusion / kernelSize);
+FragColor = occlusion;  
+</code></pre>
+<p>  最后对一个场景进行测试，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484200072.png" alt="" loading="lazy"><br>
+  最后一步，为了得到更好的结果，我们对环境光遮蔽纹理进行模糊处理。</p>
+<h2 id="环境光遮蔽模糊">环境光遮蔽模糊</h2>
+<p>  在SSAO阶段和光照阶段，我们模糊处理SSAO阶段得到的环境光遮蔽纹理，我们使用另一个帧缓冲来存储模糊结果：</p>
+<pre><code class="language-cpp">unsigned int ssaoBlurFBO, ssaoColorBufferBlur;
+glGenFramebuffers(1, &amp;ssaoBlurFBO);
+glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
+glGenTextures(1, &amp;ssaoColorBufferBlur);
+glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBufferBlur, 0);
+</code></pre>
+<p>  接着创建一个简单的模糊着色器：</p>
+<pre><code class="language-GLSL">#version 330 core
+out float FragColor;
+  
+in vec2 TexCoords;
+  
+uniform sampler2D ssaoInput;
+
+void main() {
+    vec2 texelSize = 1.0 / vec2(textureSize(ssaoInput, 0));
+    float result = 0.0;
+    for (int x = -2; x &lt; 2; ++x) 
+    {
+        for (int y = -2; y &lt; 2; ++y) 
+        {
+            vec2 offset = vec2(float(x), float(y)) * texelSize;
+            result += texture(ssaoInput, TexCoords + offset).r;
+        }
+    }
+    FragColor = result / (4.0 * 4.0);
+}  
+</code></pre>
+<p>  结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484216915.png" alt="" loading="lazy"></p>
+<h2 id="应用环境光遮蔽">应用环境光遮蔽</h2>
+<p>  接下来进入光照阶段来应用我们计算好的环境光遮蔽纹理。我们要做的非常简单，只需要采样环境光遮蔽纹理的值来影响环境光即可：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+  
+in vec2 TexCoords;
+
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedo;
+uniform sampler2D ssao;
+
+struct Light {
+    vec3 Position;
+    vec3 Color;
+    
+    float Linear;
+    float Quadratic;
+    float Radius;
+};
+uniform Light light;
+
+void main()
+{             
+    // retrieve data from gbuffer
+    vec3 FragPos = texture(gPosition, TexCoords).rgb;
+    vec3 Normal = texture(gNormal, TexCoords).rgb;
+    vec3 Diffuse = texture(gAlbedo, TexCoords).rgb;
+    float AmbientOcclusion = texture(ssao, TexCoords).r;
+    
+    // blinn-phong (in view-space)
+    vec3 ambient = vec3(0.3 * Diffuse * AmbientOcclusion); // here we add occlusion factor
+    vec3 lighting  = ambient; 
+    vec3 viewDir  = normalize(-FragPos); // viewpos is (0.0.0) in view-space
+    // diffuse
+    vec3 lightDir = normalize(light.Position - FragPos);
+    vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * light.Color;
+    // specular
+    vec3 halfwayDir = normalize(lightDir + viewDir);  
+    float spec = pow(max(dot(Normal, halfwayDir), 0.0), 8.0);
+    vec3 specular = light.Color * spec;
+    // attenuation
+    float dist = length(light.Position - FragPos);
+    float attenuation = 1.0 / (1.0 + light.Linear * dist + light.Quadratic * dist * dist);
+    diffuse  *= attenuation;
+    specular *= attenuation;
+    lighting += diffuse + specular;
+
+    FragColor = vec4(lighting, 1.0);
+}
+</code></pre>
+<p>  渲染结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484230902.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/9.ssao/ssao.cpp">Code</a>。<br>
+  由于SSAO是高度自定义话的，我们可以有多种方式来调节效果，比如我们可以用幂运算调整遮蔽因数：</p>
+<pre><code class="language-GLSL">occlusion = 1.0 - (occlusion / kernelSize);       
+FragColor = pow(occlusion, power);
+</code></pre>
+<p>  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-Lighting/SSAO">https://learnopengl.com/Advanced-Lighting/SSAO</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglyan-hou-xuan-ran/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):延后渲染
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

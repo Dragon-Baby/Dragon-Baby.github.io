@@ -1,0 +1,270 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):颜色 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):颜色
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-05 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="颜色">颜色</h1>
+<p>  在计算机中，颜色常常用代表RGB的三个数字表示，通过三种数字(0-1)的组合，我们可以表示几乎所有的颜色，比如，下面是一个珊瑚色的颜色向量：</p>
+<pre><code class="language-cpp">glm::vec3 coral(1.0f, 0.5f, 0.31f);
+</code></pre>
+<p>  在现实生活中，一个物体的颜色往往是它所反射光的颜色，而其它颜色的光都被它吸收了。当然这种规则也在图形学中被应用。比如我们定义了一束光的颜色，并定义了一个物体的颜色，我们想得到这个物体最终的颜色，做法是将前两个颜色向量相乘：</p>
+<pre><code class="language-cpp">glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+glm::vec3 toyColor(1.0f, 0.5f, 0.31f);
+glm::vec3 result = lightColor * toyColor; // = (1.0f, 0.5f, 0.31f);
+</code></pre>
+<p>  这里我们定义的是白光，可以看到物体最终的颜色就是我们所定义的颜色。接着我们定义一束绿光：</p>
+<pre><code class="language-cpp">glm::vec3 lightColor(0.0f, 1.0f, 0.0f);
+glm::vec3 toyColor(1.0f, 0.5f, 0.31f);
+glm::vec3 result = lightColor * toyColor; // = (0.0f, 0.5f, 0.0f);
+</code></pre>
+<p>  可以看到物体最终的颜色只有G通道显示了，其它都被置为0。<br>
+  上面这两个例子就很好的表明了物体显示颜色的原因，通过我们设置的对每个通道的影响来反射或吸收相应的光源的光，最终就得到物体显示的颜色。</p>
+<h1 id="光照场景">光照场景</h1>
+<p>  接下来我们模拟现实生活中的灯光。我们这里将光源当作一个立方体，和之前一样，为它单独创建顶点着色器和片元着色器，顶点着色器(我们只需要位置):</p>
+<pre><code class="language-cpp">#version 330 core
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+} 
+</code></pre>
+<p>  同样为灯光立方体创建VAO对象，我们已经将数值传入到VBO了，不必反复创建(也可以额外创建一个VBO专门管理灯光的数据):</p>
+<pre><code class="language-cpp">unsigned int lightVAO;
+glGenVertexArrays(1, &amp;lightVAO);
+glBindVertexArray(lightVAO);
+//这里只需要绑定VBO
+glBindBuffer(GL_ARRAY_BUFFER, VBO);
+// 设置顶点属性指针
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+glEnableVertexAttribArray(0);
+</code></pre>
+<p>  修改原立方体的片元着色器，用灯光颜色和物体颜色来计算结果颜色：</p>
+<pre><code class="language-cpp">#version 330 core
+out vec4 FragColor;
+  
+uniform vec3 objectColor;
+uniform vec3 lightColor;
+
+void main()
+{
+    FragColor = vec4(lightColor * objectColor, 1.0);
+}
+</code></pre>
+<p>  当然，要为这些uniform变量赋值：</p>
+<pre><code class="language-cpp">lightingShader.use();
+lightingShader.setVec3(&quot;objectColor&quot;, 1.0f, 0.5f, 0.31f);
+lightingShader.setVec3(&quot;lightColor&quot;,  1.0f, 1.0f, 1.0f);
+</code></pre>
+<p>  接着设置灯光立方体的片元着色器：</p>
+<pre><code class="language-cpp">#version 330 core
+out vec4 FragColor;
+
+void main()
+{
+    FragColor = vec4(1.0);  //白光
+}
+</code></pre>
+<p>  为了渲染灯光立方体，我们定义它的位置，并设置model矩阵，view和projection保持不变就行，最后在渲染循坏绘制灯光立方体。</p>
+<pre><code class="language-cpp">glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
+//渲染循环中
+...
+model = glm::mat4(1.0f);
+model = glm::translate(model, lightPos);
+model = glm::scale(model, glm::vec3(0.2f)); 
+...
+lightCubeShader.use();
+...
+glBindVertexArray(lightCubeVAO);
+glDrawArrays(GL_TRIANGLES, 0, 36);	
+</code></pre>
+<p>  最终结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594478312916.png" alt="" loading="lazy"><br>
+  这里给出源码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/2.lighting/1.colors/colors.cpp">Code</a>。<br>
+  最后，给出原文地址，请多多参考：<a href="https://learnopengl.com/Lighting/Colors">https://learnopengl.com/Lighting/Colors</a>。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglshe-xiang-ji/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):摄像机
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

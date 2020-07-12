@@ -1,0 +1,412 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):法线贴图 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):法线贴图
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-14 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>  模型的网格构成其结构，纹理赋予其光影，但如果观察我们之前的所有例子，都会发现模型的表面都是扁平的，就算赋予了纹理也看起来不真实，因为现实生活中的大部分物体都是表面粗糙，凹凸不平的。<br>
+  比如，一个贴有砖块纹理的平面。砖墙本身应该表面凹凸不平，有缝隙，有划痕，有孔洞，运用我们之前学过的技术，我们会在之前的平面上贴上纹理来模拟砖墙：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482718040.png" alt="" loading="lazy"><br>
+  仔细观察的话，所有的凹凸不平、缝隙和孔洞这些细节全都没有表现出来，平面看上去非常扁平。我们其实可以利用一些技术来表现细节，比如使用高光贴图来让某些地方照亮的更少，但这不算是一种真正的解决方式。<br>
+  如果我们从灯光的角度去思考的话：平面是怎么样被渲染为完全扁平的平面的？我们可以想到是平面的法线，决定物体形状的就是它的法线。平面使用的是单独的法线，所以表面没有起伏变化，那么如果我们为每个片段计算不同的法线，并操作这些法线产生一些变化的话，表面应该就能看起来起伏了。下面的图说明了这个想法：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482727580.png" alt="" loading="lazy"><br>
+  通过每个片段使用不同的法线，我们可以欺骗灯光一个平面由许多不同的小片段构成，这样可以增加很多细节。这项技术被称为法线贴图或凹凸贴图。下面是一个对比例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482739825.png" alt="" loading="lazy"><br>
+  可以看到，使用了法线贴图的平面看起来有了非常丰富的细节，并且由于我们只改变了每个片段的法线方向，所以开销也很小。</p>
+<h1 id="法线贴图">法线贴图</h1>
+<p>  为了使用法线贴图技术我们需要每个片段的法线。就像使用漫反射贴图和高光贴图，我们可以将每一片段的法线信息存储在一张纹理中。<br>
+  由于法线向量由几何方式存储，而纹理存储的是颜色信息，所以这二者的转换不那么直接。纹理中颜色由r、g、b三个组件构成向量表示，法线由x、y、z三个组件构成向量表示。法线的组件取值范围为[-1,1]，颜色的范围是[0, 1]，所以我们需要进行一下映射：</p>
+<pre><code class="language-GLSL">vec3 rgb_normal = normal * 0.5 + 0.5; // transforms from [-1,1] to [0,1]  
+</code></pre>
+<p>  这样的话，我们就可以将法线信息转化为颜色信息存储在纹理中。下面是砖块纹理的法线贴图：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482752109.png" alt="" loading="lazy"><br>
+  可以看到纹理图片大部分颜色与蓝色相关，这是因为大部分法线倾向于垂直于平面，也就是倾向于指向z轴，对应的是b通道，所以倾向于蓝色，依此类推解释其它的颜色。<br>
+  通过这个法线贴图，我们可以结合漫反射纹理来渲染一个平面。（记住，OpenGL纹理的原点在左下角，大部分图片的原点在左上角）我们需要做的就是按常规加载这张法线贴图，并设置相关参数。注意，在片元着色器中我们将使用法线贴图中的法线信息计算光照：</p>
+<pre><code class="language-GLSL">uniform sampler2D normalMap;  
+
+void main()
+{           
+    // obtain normal from normal map in range [0,1]
+    normal = texture(normalMap, fs_in.TexCoords).rgb;
+    // transform normal vector to range [-1,1]
+    normal = normalize(normal * 2.0 - 1.0);   
+  
+    [...]
+    // proceed with lighting as normal
+}  
+</code></pre>
+<p>  加载法线贴图，并根据纹理坐标映射后，我们的到法线信息，首先将其标准化到[-1,1]，接着照常计算光照。<br>
+  最后的结果就是这样：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482763187.png" alt="" loading="lazy"><br>
+  但存在一个限制法线贴图使用的问题，法线贴图中存储的法线信息大部分都是指向z轴的，如果平面也指向z轴，效果的确很好，但如果不是，比如下面的平面指向y轴，结果就不对了：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482774452.png" alt="" loading="lazy"><br>
+  这是因为从法线贴图中采样的法线信息仍指向z轴，这样的光照计算时仍会将平面的片段误当作指向z轴来计算，结果就是不正确的：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482784571.png" alt="" loading="lazy"><br>
+  有一种解决这种问题的办法是针对每个平面设置自己的法线贴图，然而，针对包含大量模型的大场景来说这根本不现实。<br>
+  另一种可行的方法是在不同的坐标空间中计算光照，来保证从法线贴图中采样的法线向量始终指向z轴，其它相关的向量也会转换到相同的坐标空间中。使用这种方法，我们可以复用一张法线贴图，而这种坐标空间被称为切线空间。</p>
+<h1 id="切线空间">切线空间</h1>
+<p>  在法线贴图中的法线向量在切线空间中表示，在这个空间中，法线基本都会大致指向+z轴的方向。切线空间是相对于每个平面三角形的空间，我们将这个空间作为法线贴图自己的空间，用来描述法线向量。当我们想要使用法线贴图中的法线进行计算时，我们就可以使用一个特殊的矩阵变换将法线从切线空间转化到世界空间或视图空间，这样就可以与物体相对应。<br>
+  所以解决上面法线贴图不正确的方法就是定义一个特殊的矩阵将切线空间中的法线进行一些转化，让法线大致指向+y轴。<br>
+  而这么一个特殊的矩阵被称为TBN矩阵，每个字母分别代表切线(Tangent)、双切线(Bitangent)、法线(Normal)向量，这三个向量将用来构成一个矩阵。为了获取这三个矩阵，我们定义切线空间的三个轴，上、右、前。<br>
+  我们已经有了代表上的轴向，即法线向量，右和前轴分别是切线和双切线向量，下面是图例说明：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482795887.png" alt="" loading="lazy"><br>
+  计算一个切线和双切线向量并不像法线那么直接，下面是计算过程。先看这么一张图：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482804353.png" alt="" loading="lazy"><br>
+  如上图，我们随意在纹理上绘制一个三角形，来作为三角形的映射区域，将切线所在的轴的坐标称为U，将双切线所在轴的坐标称为V，如果<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Δ</mi><msub><mi>U</mi><mn>1</mn></msub><mo>=</mo><msub><mi>U</mi><mn>2</mn></msub><mo>−</mo><msub><mi>U</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\Delta U_1 = U_2 - U_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord">Δ</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Δ</mi><msub><mi>U</mi><mn>2</mn></msub><mo>=</mo><msub><mi>U</mi><mn>3</mn></msub><mo>−</mo><msub><mi>U</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\Delta U_2 = U_3 - U_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord">Δ</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Δ</mi><msub><mi>V</mi><mn>1</mn></msub><mo>=</mo><msub><mi>V</mi><mn>2</mn></msub><mo>−</mo><msub><mi>V</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\Delta V_1 = V_2 - V_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord">Δ</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Δ</mi><msub><mi>V</mi><mn>1</mn></msub><mo>=</mo><msub><mi>V</mi><mn>2</mn></msub><mo>−</mo><msub><mi>V</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\Delta V_1 = V_2 - V_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord">Δ</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.22222em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，那么<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>E</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">E_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>E</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">E_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>用<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">T</span></span></span></span>和<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05017em;">B</span></span></span></span>表示就是：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482877124.png" alt="" loading="lazy"><br>
+  同样，这只是在切线空间的表示，如果我们将每个向量分开表示，就是：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482884701.png" alt="" loading="lazy"><br>
+  我们将<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span></span></span></span>作为两个三角形位置的差，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>U</mi></mrow><annotation encoding="application/x-tex">\Delta U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">Δ</span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span></span></span></span>和<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>V</mi></mrow><annotation encoding="application/x-tex">\Delta V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">Δ</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span></span></span></span>是纹理坐标的差。上面的两个等式可以写成下面的矩阵形式：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482924487.png" alt="" loading="lazy"><br>
+  我们进行一下变换，将UV放到左侧：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482903155.png" alt="" loading="lazy"><br>
+  我们将矩阵的逆用伴随矩阵和行列式表示，等式就是这样：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482937620.png" alt="" loading="lazy"><br>
+  通过上面的等式我们就可以通过三角形的两条边和纹理坐标来计算切线和双切线向量。</p>
+<h2 id="手动计算切线和双切线">手动计算切线和双切线</h2>
+<p>  我们首先定义一个平面的四个顶点和每个顶点的纹理坐标(123和134两个三角形)，以及平面的法线朝向：</p>
+<pre><code class="language-cpp">// positions
+glm::vec3 pos1(-1.0,  1.0, 0.0);
+glm::vec3 pos2(-1.0, -1.0, 0.0);
+glm::vec3 pos3( 1.0, -1.0, 0.0);
+glm::vec3 pos4( 1.0,  1.0, 0.0);
+// texture coordinates
+glm::vec2 uv1(0.0, 1.0);
+glm::vec2 uv2(0.0, 0.0);
+glm::vec2 uv3(1.0, 0.0);
+glm::vec2 uv4(1.0, 1.0);
+// normal vector
+glm::vec3 nm(0.0, 0.0, 1.0);  
+</code></pre>
+<p>  根据上面提到的步骤，计算第一个三角形的两条边和两条边对应的ΔUV坐标：</p>
+<pre><code class="language-cpp">glm::vec3 edge1 = pos2 - pos1;
+glm::vec3 edge2 = pos3 - pos1;
+glm::vec2 deltaUV1 = uv2 - uv1;
+glm::vec2 deltaUV2 = uv3 - uv1;  
+</code></pre>
+<p>  然后，我们就可以按照等式计算切线和双切线了：</p>
+<pre><code class="language-cpp">float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+tangent1 = glm::normalize(tangent1);
+
+bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+bitangent1 = glm::normalize(bitangent1);  
+  
+[...] // 对第二个三角形进行同样的操作
+</code></pre>
+<p>  作为结果，切线和双切线的值应该为(1,0,0)和(0,1,0)，它们和法线(0,0,1)构成TBN矩阵，在平面上显示就是这样：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482954978.png" alt="" loading="lazy"></p>
+<h2 id="切线空间法线贴图">切线空间法线贴图</h2>
+<p>  我们首先在着色器中定义TBN矩阵，可以在顶点着色器中传入我们计算好的切线、双切线以及法线作为顶点属性：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoords;
+layout (location = 3) in vec3 aTangent;
+layout (location = 4) in vec3 aBitangent;  
+</code></pre>
+<p>  接着在main方法中创建TBN矩阵：</p>
+<pre><code class="language-GLSL">void main()
+{
+   [...]
+   vec3 T = normalize(vec3(model * vec4(aTangent,   0.0)));
+   vec3 B = normalize(vec3(model * vec4(aBitangent, 0.0)));
+   vec3 N = normalize(vec3(model * vec4(aNormal,    0.0)));
+   mat3 TBN = mat3(T, B, N)
+}
+</code></pre>
+<p>  我们首先将TBN三个向量分别转化到我们想要工作的空间中，然后组装为TBN矩阵。为了跟精确一些，我们可以将TBN三个向量分别进行和我们之前处理向量一样的操作，因为我们只关心这些向量的指向。<br>
+  使用这个TBN矩阵的方式有两种：</p>
+<ol>
+<li>我们使用使用TBN矩阵将所有向量从切线空间转化到世界空间，并将其传入片元着色器，并将从法线贴图中采样的法线向量用TBN矩阵转化到世界空间。</li>
+<li>我们使用TBN的逆矩阵将所有向量从世界空间转化到切线空间，接着在片元着色器中将所有出法线外的与光照计算相关的向量转化到切线空间。<br>
+  这里先介绍第一种。<br>
+  将TBN矩阵传入片元着色器：</li>
+</ol>
+<pre><code class="language-GLSL">out VS_OUT {
+    vec3 FragPos;
+    vec2 TexCoords;
+    mat3 TBN;
+} vs_out;  
+  
+void main()
+{
+    [...]
+    vs_out.TBN = mat3(T, B, N);
+}
+</code></pre>
+<p>  在片元着色器中输入：</p>
+<pre><code class="language-GLSL">in VS_OUT {
+    vec3 FragPos;
+    vec2 TexCoords;
+    mat3 TBN;
+} fs_in;  
+</code></pre>
+<p>  使用TBN矩阵我们将采样的法线向量转化世界空间：</p>
+<pre><code class="language-GLSL">normal = texture(normalMap, fs_in.TexCoords).rgb;
+normal = normal * 2.0 - 1.0;   
+normal = normalize(fs_in.TBN * normal); 
+</code></pre>
+<p>  接着介绍第二种，我们将TBN矩阵的逆输出到片元着色器：</p>
+<pre><code class="language-GLSL">vs_out.TBN = transpose(mat3(T, B, N));   
+</code></pre>
+<p>  注意到我们使用的是转置，这是因为TBN矩阵是一个正交矩阵，它的逆等于它的转置，所以我们避免使用inverse来避免巨大的开销。<br>
+  接着在片元着色器中将所有与灯光计算相关的向量转化到切线空间：</p>
+<pre><code class="language-GLSL">void main()
+{           
+    vec3 normal = texture(normalMap, fs_in.TexCoords).rgb;
+    normal = normalize(normal * 2.0 - 1.0);   
+   
+    vec3 lightDir = fs_in.TBN * normalize(lightPos - fs_in.FragPos);
+    vec3 viewDir  = fs_in.TBN * normalize(viewPos - fs_in.FragPos);    
+    [...]
+}  
+</code></pre>
+<p>  看起来第二种方式更为复杂，因为要计算的东西更多，但第二种方式有它的优点：我们可以将所有转化工作在顶点着色器中进行。这是可行的，因为lightPos和viewLPos这种向量并不会在片元着色器中更新，同时也可以在顶点着色器中计算fs_in.FragPos计算切线空间的位置。的确，考虑效率，不必在片元着色器中进行空间的转化。<br>
+  所以接下来我们在顶点着色器中完成这些操作:</p>
+<pre><code class="language-GLSL">out VS_OUT {
+    vec3 FragPos;
+    vec2 TexCoords;
+    vec3 TangentLightPos;
+    vec3 TangentViewPos;
+    vec3 TangentFragPos;
+} vs_out;
+
+uniform vec3 lightPos;
+uniform vec3 viewPos;
+ 
+[...]
+  
+void main()
+{    
+    [...]
+    mat3 TBN = transpose(mat3(T, B, N));
+    vs_out.TangentLightPos = TBN * lightPos;
+    vs_out.TangentViewPos  = TBN * viewPos;
+    vs_out.TangentFragPos  = TBN * vec3(model * vec4(aPos, 0.0));
+}  
+</code></pre>
+<p>  这样将相关变量传入片元着色器中就可以直接进行计算。<br>
+  为了观察光照是否正确，我们可以让平面一直旋转：</p>
+<pre><code class="language-cpp">glm::mat4 model = glm::mat4(1.0f);
+model = glm::rotate(model, (float)glfwGetTime() * -10.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+shader.setMat4(&quot;model&quot;, model);
+RenderQuad();
+</code></pre>
+<p>  最后的结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594482972531.png" alt="" loading="lazy"><br>
+  这里提供原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/5.advanced_lighting/4.normal_mapping/normal_mapping.cpp">Code</a>。</p>
+<h2 id="复杂模型">复杂模型</h2>
+<p>  针对复杂模型，我们并不经常手动计算切线空间的相关向量。比如在导入模型时，我们可以借助assimp库来帮助我们计算。<br>
+  assimp库有一个读文件方法有一个配置选项为aiProcess_CalTangentSpace，这样assimp可以为每个顶点都计算切线和双切线：</p>
+<pre><code class="language-cpp">const aiScene *scene = importer.ReadFile(
+    path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace
+);  
+</code></pre>
+<p>  我们可以像下面这样获取切线：</p>
+<pre><code class="language-cpp">vector.x = mesh-&gt;mTangents[i].x;
+vector.y = mesh-&gt;mTangents[i].y;
+vector.z = mesh-&gt;mTangents[i].z;
+vertex.Tangent = vector;  
+</code></pre>
+<p>  这样的话，我们可以为模型加载它的法线贴图，我们使用aiTextureType_Height选项：</p>
+<pre><code class="language-cpp">vector&lt;Texture&gt; normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, &quot;texture_normal&quot;); 
+</code></pre>
+<h2 id="小技巧">小技巧</h2>
+<p>  针对复杂模型时，切线往往是经过许多顶点计算的，这样就可以得到一个平均值来获得平滑的结果，这样会造成一个问题，那就是T、B、N三个向量可能不会相互垂直了，也就是TBN矩阵不是正交的了。<br>
+  针对这一问题，我们可以使用格拉姆施密特方法来重新正交化TBN矩阵，在顶点着色器中这么做：</p>
+<pre><code class="language-GLSL">vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
+vec3 N = normalize(vec3(model * vec4(aNormal, 0.0)));
+// 使用N正交化T
+T = normalize(T - dot(T, N) * N);
+// 叉乘得B
+vec3 B = cross(N, T);
+
+mat3 TBN = mat3(T, B, N)  
+</code></pre>
+<p>  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-Lighting/Normal-Mapping">https://learnopengl.com/Advanced-Lighting/Normal-Mapping</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-opengldian-yin-ying/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):点阴影
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

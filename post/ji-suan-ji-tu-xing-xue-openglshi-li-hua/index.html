@@ -1,0 +1,431 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):实例化 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):实例化
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-11 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="实例化">实例化</h1>
+<p>  想一想某个游戏场景或动画场景，我们总会法线某些模型是重复的，也就是使用了同样的顶点数据，只不过有了不同的世界空间变换。比如草地，我们可能想通过一个简单的叶子模型进行重复绘制来形成草地，一株草可能只包含几个三角形，但整个草地的三角形数量是巨大的。<br>
+  如果真的逐个绘制重复的模型，我们大概会在渲染循环中这么实现：</p>
+<pre><code class="language-cpp">for(unsigned int i = 0; i &lt; amount_of_models_to_draw; i++)
+{
+    DoSomePreparations(); // 绑定VAO，绑定纹理，设置uniform之类的。
+    glDrawArrays(GL_TRIANGLES, 0, amount_of_vertices);
+}
+</code></pre>
+<p>  由于对绘制命令的大量调用，我们很容易到达性能的瓶颈，因为使用类似glDrawArrays或glDrawElements的命令会消耗大量的性能，OpenGL必须在绘制前做一些必要的准备（比如告知GPU从哪片缓冲区读取数据，在哪里找到顶点属性，这些操作都会在CPU和GPU之间进行）。所以说即使渲染出图像很快，但给GPU这些命令却不是那么快。<br>
+  但如果我们只向GPU运送一次数据，并使用一个渲染命令来绘制大量重复的物体，这将会更加有效率。而这种方法就是实例化。<br>
+  实例化在渲染大量重复物体时非常有用，只需要使用一次渲染命令，节省了大量CPU与GPU之间的通信次数。使用实例化绘制物体我们使用glDrawArraysInstanced和glDrawElementsInstanced命令。这两个命令需要额外的实例化数量参数来表明我们想绘制的重复物体的数量。我们将需要的数据送往GPU一次，然后告知GPU如何绘制这些实例化物体，接着GPU就可以大量绘制这些实例化物体了。<br>
+  这个方法本身由点局限性，因为它所有绘制的物体都和要实例化的物体一致，包括位置、纹理等一切信息。也就是说，我们只能在屏幕上看到一个物体显示。当然，考虑到这一点，GLSL在顶点着色器中提供了一个内建变量gl_InstanceID。<br>
+  每渲染一个实例物体，gl_InstanceID就会从0开始自增1。如果我们渲染了43个实例物体，那么gl_InstanceID=42。这样，我们就可以根据这个值为每一个实例物体分配一些特定的属性，比如改变每个实例物体的位置。<br>
+  比如下面我们绘制了100个相同的2d平面，我们，给每个平面一点偏移量，就可以得到下面的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481418739.png" alt="" loading="lazy"><br>
+  每个四边形包含2个三角形即6个顶点。每个顶点包含1个2为标准坐标和一个颜色向量。为了保证100个三角形能铺满屏幕，我们让平面的大小尽可能地小：</p>
+<pre><code class="language-cpp">float quadVertices[] = {
+    // positions     // colors
+    -0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
+     0.05f, -0.05f,  0.0f, 1.0f, 0.0f,
+    -0.05f, -0.05f,  0.0f, 0.0f, 1.0f,
+
+    -0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
+     0.05f, -0.05f,  0.0f, 1.0f, 0.0f,   
+     0.05f,  0.05f,  0.0f, 1.0f, 1.0f		    		
+};  
+</code></pre>
+<p>  平面的片元着色器很简单，输出颜色使用我们设定的顶点颜色：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+  
+in vec3 fColor;
+
+void main()
+{
+    FragColor = vec4(fColor, 1.0);
+}
+</code></pre>
+<p>  在顶点着色器中我们设置了一些变化：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec3 aColor;
+
+out vec3 fColor;
+
+uniform vec2 offsets[100];
+
+void main()
+{
+    vec2 offset = offsets[gl_InstanceID];
+    gl_Position = vec4(aPos + offset, 0.0, 1.0);
+    fColor = aColor;
+}  
+</code></pre>
+<p>  我们定义了一个100大小的uniform偏移数组，按顺序(gl_InstanceID)对每个平面进行偏移。<br>
+  接着我们需要为uniform偏移数组赋值。我们在进入渲染循环前线定义一下一个偏移数组：</p>
+<pre><code class="language-cpp">glm::vec2 translations[100];
+int index = 0;
+float offset = 0.1f;
+for(int y = -10; y &lt; 10; y += 2)
+{
+    for(int x = -10; x &lt; 10; x += 2)
+    {
+        glm::vec2 translation;
+        translation.x = (float)x / 10.0f + offset;
+        translation.y = (float)y / 10.0f + offset;
+        translations[index++] = translation;
+    }
+}  
+</code></pre>
+<p>  接着将数据传入uniform偏移数组：</p>
+<pre><code class="language-cpp">shader.use();
+for(unsigned int i = 0; i &lt; 100; i++)
+{
+    shader.setVec2((&quot;offsets[&quot; + std::to_string(i) + &quot;]&quot;)), translations[i]);
+}  
+</code></pre>
+<p>  最后，在渲染循环中，我们绘制这100个平面：</p>
+<pre><code class="language-cpp">glBindVertexArray(quadVAO);
+glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);  
+</code></pre>
+<h2 id="实例化数组">实例化数组</h2>
+<p>  上述的例子非常有用，但平常我们绘制实例化物体总会超过100个，而这就表明我们会超过uniform数据数量的限制。另一个替代的方法为实例化数组。实例化数字被定义为一种顶点属性，允许我们存储更多的数据，并且数据是每个平面进行更新而非每个顶点进行更新。<br>
+  如果我们定义了新的顶点属性，即实例化数组，我们需要在顶点着色器开头声明：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aOffset;
+
+out vec3 fColor;
+
+void main()
+{
+    gl_Position = vec4(aPos + aOffset, 0.0, 1.0);
+    fColor = aColor;
+}  
+</code></pre>
+<p>  由于实例化数组是一个顶点属性，我们需要存储在一个顶点缓冲对象中，并设置相应的顶点属性指针。首先将我们定义的偏移数组传入一个新的VBO：</p>
+<pre><code class="language-cpp">unsigned int instanceVBO;
+glGenBuffers(1, &amp;instanceVBO);
+glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 100, &amp;translations[0], GL_STATIC_DRAW);
+glBindBuffer(GL_ARRAY_BUFFER, 0); 
+</code></pre>
+<p>  接着设置顶点属性指针：</p>
+<pre><code class="language-cpp">glEnableVertexAttribArray(2);
+glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+glBindBuffer(GL_ARRAY_BUFFER, 0);	
+glVertexAttribDivisor(2, 1);  
+</code></pre>
+<p>  注意最后，我们使用了glVertexAttribDivisor。这个方法告知何时更新顶点属性（不是每个顶点都更新）。第一个参数代表顶点属性的位置，第二个参数是属性除数。默认情况下，属性除数为0，表明每个顶点都会更新数据。这里使用1表明我们想在绘制一个新的实例时更新数据。如果设为2则是每绘制两个实例更新数据，以此类推。通过将属性除数设为1我们告知OpenGL在2位置的顶点属性是实例化数组。<br>
+  其它不变，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481418739.png" alt="" loading="lazy"><br>
+  可以看到结果和第一种方法一致，但使用实例化数组允许我们存入更多的数据，绘制更多的实例物体。<br>
+  我们可以使用内建的gl_InstanceID来逐行缩小平面玩一玩：</p>
+<pre><code class="language-GLSL">void main()
+{
+    vec2 pos = aPos * (gl_InstanceID / 100.0);
+    gl_Position = vec4(pos + aOffset, 0.0, 1.0);
+    fColor = aColor;
+} 
+</code></pre>
+<p>  运行结果如下:<br>
+<img src="https://dragon-baby.github.io/post-images/1594481452629.png" alt="" loading="lazy"><br>
+  这里给出原文参考代码:<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/10.1.instancing_quads/instancing_quads.cpp">Code</a>。</p>
+<h1 id="小行星带">小行星带</h1>
+<p>  想象一个场景，中心有一个天体，又一圈大的小行星带环绕。这样一圈小行星带包含成千上万的岩石，如果就这么直接渲染的话，最好的显卡也招架不住。我们可以使用实例化技术来实现这一看似不可能的渲染。行星带的每块岩石都可以看作是一块源石进行一些不同的变换得到的。<br>
+  为了体现实例化渲染的优势，我们首先直接渲染模型。这里给出天体模型和行星带岩石模型：<a href="https://learnopengl.com/data/models/planet.zip">天体</a>，<a href="https://learnopengl.com/data/models/rock.zip">行星带</a>。<br>
+  我们为每个小行星带的岩石设置model变换矩阵。我们首先根据一个圆形的半径进行不同的半径替换（在原始半径的基础上在偏移范围内添加添加扰动），得到位置，接着随机缩放和旋转一下：</p>
+<pre><code class="language-cpp">unsigned int amount = 1000;
+glm::mat4 *modelMatrices;
+modelMatrices = new glm::mat4[amount];
+srand(glfwGetTime()); // initialize random seed	
+float radius = 50.0;
+float offset = 2.5f;
+for(unsigned int i = 0; i &lt; amount; i++)
+{
+    glm::mat4 model = glm::mat4(1.0f);
+    // 1. translation: displace along circle with 'radius' in range [-offset, offset]
+    float angle = (float)i / (float)amount * 360.0f;
+    float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+    float x = sin(angle) * radius + displacement;
+    displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+    float y = displacement * 0.4f; // keep height of field smaller compared to width of x and z
+    displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+    float z = cos(angle) * radius + displacement;
+    model = glm::translate(model, glm::vec3(x, y, z));
+
+    // 2. scale: scale between 0.05 and 0.25f
+    float scale = (rand() % 20) / 100.0f + 0.05;
+    model = glm::scale(model, glm::vec3(scale));
+
+    // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
+    float rotAngle = (rand() % 360);
+    model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
+
+    // 4. now add to list of matrices
+    modelMatrices[i] = model;
+}  
+</code></pre>
+<p>  在加载天体和岩石模型以及设定一系列着色器后，渲染代码长这样：</p>
+<pre><code class="language-cpp">// draw planet
+shader.use();
+glm::mat4 model = glm::mat4(1.0f);
+model = glm::translate(model, glm::vec3(0.0f, -3.0f, 0.0f));
+model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+shader.setMat4(&quot;model&quot;, model);
+planet.Draw(shader);
+  
+// draw meteorites
+for(unsigned int i = 0; i &lt; amount; i++)
+{
+    shader.setMat4(&quot;model&quot;, modelMatrices[i]);
+    rock.Draw(shader);
+}  
+</code></pre>
+<p>  运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481474817.png" alt="" loading="lazy"><br>
+  整个场景每帧包含1001次渲染命令调用，只是为了绘制1000个岩石。这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/10.2.asteroids/asteroids.cpp">Code</a>。<br>
+  很明显，这太浪费资源了，而且如果不断增加岩石的数量，很快就会到达性能的瓶颈。<br>
+  接下来我们使用实例化来渲染整个场景。首先调整顶点着色器：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 2) in vec2 aTexCoords;
+layout (location = 3) in mat4 instanceMatrix;
+
+out vec2 TexCoords;
+
+uniform mat4 projection;
+uniform mat4 view;
+
+void main()
+{
+    gl_Position = projection * view * instanceMatrix * vec4(aPos, 1.0); 
+    TexCoords = aTexCoords;
+}
+</code></pre>
+<p>  我们直接将model矩阵定义为顶点属性。矩阵这里的大小为mat4，即4*vec4，我们的顶点属性的数据最大大小为vec4，所以即使我们我们将位置定义为3，我们还需要使用4、5、6的位置来存储矩阵数据。<br>
+  我们设置每个属性指针并配置实例化数组：</p>
+<pre><code class="language-cpp">// vertex buffer object
+unsigned int buffer;
+glGenBuffers(1, &amp;buffer);
+glBindBuffer(GL_ARRAY_BUFFER, buffer);
+glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &amp;modelMatrices[0], GL_STATIC_DRAW);
+  
+for(unsigned int i = 0; i &lt; rock.meshes.size(); i++)
+{
+    unsigned int VAO = rock.meshes[i].VAO;
+    glBindVertexArray(VAO);
+    // vertex attributes
+    std::size_t vec4Size = sizeof(glm::vec4);
+    glEnableVertexAttribArray(3); 
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+    glEnableVertexAttribArray(4); 
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+    glEnableVertexAttribArray(5); 
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+    glEnableVertexAttribArray(6); 
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
+
+    glBindVertexArray(0);
+}  
+</code></pre>
+<p>  接着我们使用glDrawElementsInstanced绘制岩石：</p>
+<pre><code class="language-cpp">// draw meteorites
+instanceShader.use();
+for(unsigned int i = 0; i &lt; rock.meshes.size(); i++)
+{
+    glBindVertexArray(rock.meshes[i].VAO);
+    glDrawElementsInstanced(
+        GL_TRIANGLES, rock.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, amount
+    );
+}  
+</code></pre>
+<p>  为了体现实例化的优势，我们将绘制数量调整为10万，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481488065.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/10.3.asteroids_instanced/asteroids_instanced.cpp">Code</a>。<br>
+  最后，贴出原文地址供参考：<a href="https://learnopengl.com/Advanced-OpenGL/Instancing">https://learnopengl.com/Advanced-OpenGL/Instancing</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglji-he-zhao-se-qi/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):几何着色器
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

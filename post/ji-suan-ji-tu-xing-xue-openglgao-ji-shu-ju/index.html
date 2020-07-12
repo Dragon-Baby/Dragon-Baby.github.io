@@ -1,0 +1,241 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):高级数据 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):高级数据
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-09 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="高级数据">高级数据</h1>
+<p>  在之前的章节中，我们广泛的使用了OpenGL中的缓冲来在GPU上存储数据，这一章来讨论一下管理缓冲的其它方法。<br>
+  缓冲在OpenGL中，是一个管理一片GPU内存空间的对象，我们将其绑定到特定的缓冲区来赋予缓冲对象意义。<br>
+  到目前为止，我们使用glBufferData来填充缓冲的内存空间，这个方法会分配一片GPU内存，并将数据存储到这片内存。如果我们传入NULL，则只会分配内存空间。<br>
+  其实我们可以只填充缓冲的特定区域，使用glBufferSubData。这个方法要求一个缓冲区参数，一个偏移参数，一个数据大小的参数，以及要传入的数据。我们使用这个偏移参数来指定要填充数据的位置。注意，为了确保缓冲有足够的内存空间，最好在调用glBufferSubData前调用glBufferData，下面是glBufferSubData的一个例子：</p>
+<pre><code class="language-cpp">glBufferSubData(GL_ARRAY_BUFFER, 24, sizeof(data), &amp;data); // 范围: [24, 24 + sizeof(data)]
+</code></pre>
+<p>  当然，填充数据还有另一种方法，我们可以创建指向一块缓冲内存的指针，然后将数据复制到这块区域。我们可以使用glMapBuffer创建一块缓冲内存区域并返回一个指针。下前面是一个例子：</p>
+<pre><code class="language-cpp">float data[] = {
+  0.5f, 1.0f, -0.35f
+  ...
+};
+glBindBuffer(GL_ARRAY_BUFFER, buffer);
+// 创建指针
+void *ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+// 将数据复制到内存
+memcpy(ptr, data, sizeof(data));
+// 我们不再需要这个指针
+glUnmapBuffer(GL_ARRAY_BUFFER);
+</code></pre>
+<p>  我们使用glUnmapBuffer来结束指针的操作。使用glMapBuffer的优势是不需要使用中转内存区域。</p>
+<h2 id="批处理顶点属性">批处理顶点属性</h2>
+<p>  使用glVertexAttribPointer我们可以对VAO中的顶点属性进行位置分配，但之前我们都是使用glBufferData一次传入数据，所以是按照位置、法线、纹理坐标的顺序来紧密排列每个顶点，我们可以使用glBufferSubData来自定义顺序。<br>
+  我们可以单独定义顶点的位置，法线和纹理坐标，并按照顺序传入缓冲区的内存中，内存中存储的顺序为：所有顶点的位置--所有顶点的法线--所有顶点的纹理坐标。例子如下：</p>
+<pre><code class="language-cpp">float positions[] = { ... };
+float normals[] = { ... };
+float tex[] = { ... };
+// fill buffer
+glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(positions), &amp;positions);
+glBufferSubData(GL_ARRAY_BUFFER, sizeof(positions), sizeof(normals), &amp;normals);
+glBufferSubData(GL_ARRAY_BUFFER, sizeof(positions) + sizeof(normals), sizeof(tex), &amp;tex);
+</code></pre>
+<p>  这样，我们也需要修改glVertexAttribPointer的配置：</p>
+<pre><code class="language-cpp">glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);  
+glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(sizeof(positions)));  
+glVertexAttribPointer(
+  2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(sizeof(positions) + sizeof(normals)));  
+</code></pre>
+<h2 id="复制缓冲">复制缓冲</h2>
+<p>  如果你的缓冲对象中填满了数据，我们可以将数据复制到另一个缓冲对象。我们使用glCopyBufferSubData来完成这一操作：</p>
+<pre><code class="language-cpp">void glCopyBufferSubData(GLenum readtarget, GLenum writetarget, GLintptr readoffset,
+                         GLintptr writeoffset, GLsizeiptr size);
+</code></pre>
+<p>  readtarget和witetarget分别代表贡献数据的缓冲区和获得数据的缓冲区，readoffset和writeoffset代表两个缓冲区执行操作开始的位置，size代表复制数据的大小。例如，我们可以将VERTEX_ARRAY_BUFFER上的数据复制到VERTEX_ELEMENT_ARRAY_BUFFER上。但如果想要在两个同一缓冲区上的缓冲对象之间进行复制操作呢？基于这一问题，OpenGL提供了两个缓冲区：GL_COPY_READ_BUFFER和GL_COPY_WRITE_BUFFER，我们只需要在进行复制操作前将两个缓冲对象绑定至这两个缓冲区就行：</p>
+<pre><code class="language-cpp">glBindBuffer(GL_COPY_READ_BUFFER, vbo1);
+glBindBuffer(GL_COPY_WRITE_BUFFER, vbo2);
+glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, 8 * sizeof(float));
+</code></pre>
+<p>  我们也可以只将待写入的缓冲对象绑定至GL_COPY_WRITE_BUFFER:</p>
+<pre><code class="language-cpp">float vertexData[] = { ... };
+glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+glBindBuffer(GL_COPY_WRITE_BUFFER, vbo2);
+glCopyBufferSubData(GL_ARRAY_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, 8 * sizeof(float));  
+</code></pre>
+<p>  最后，给出原文地址供参考：<a href="https://learnopengl.com/Advanced-OpenGL/Advanced-Data">https://learnopengl.com/Advanced-OpenGL/Advanced-Data</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-opengltian-kong-he/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):天空盒
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

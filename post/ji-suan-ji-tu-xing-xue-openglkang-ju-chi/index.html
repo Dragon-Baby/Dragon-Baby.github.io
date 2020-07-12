@@ -1,0 +1,291 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):抗锯齿 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):抗锯齿
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-11 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="抗锯齿">抗锯齿</h1>
+<p>  在进行一些渲染时，我们可能会得到边缘锯齿感的模型。造成锯齿感的原因就是渲染管线实现的原理。其中有一步是将顶点数据通过光栅化转化为实际的片元，而这就是可能的锯齿感的来源。下面是一个边缘有锯齿感的渲染结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481554415.png" alt="" loading="lazy"><br>
+  如果将镜头拉近的话，结果会更加明显：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481563496.png" alt="" loading="lazy"><br>
+  很明显，这不是我们想要的渲染结果，所以我们需要抗锯齿的技术来平滑边缘。<br>
+  首先，有一种称为超级采样抗锯齿(SSAA)的技术，它在渲染时会暂时使用更高分辨率的渲染缓冲（超级采样），在全部场景渲染完成后，分辨率便会降为正常的分辨率，这种额外的分辨率被用来抗锯齿。虽然使用高分辨率渲染可以帮助我们抗锯齿，但这也意味着我们需要绘制更多的片段，所以这种技术现在并不怎么使用。<br>
+  上述的SSAA技术催生了一种更先进的技术，称为多重采样抗锯齿(MSAA)，概念源自SSAA，但使用了更有效率的方式。</p>
+<h2 id="多重采样">多重采样</h2>
+<p>  为了了解多重采样的概念，我们首先介绍OpenGL光栅化的原理。<br>
+  光栅化是一系列算法和处理的结合，位于最终的顶点处理和片元着色器阶段之间。光栅化将所有属于一个基本体的顶点变换为一系列片段。顶点坐标理论上可以随意制定，但由于片段与屏幕分辨率所关联，所以不能随意决定坐标。在顶点坐标和片段之间，几乎不会有一一对应的映射关系，所以光栅化必须通过某些方法来决定每个顶点会被映射到哪个片段上。<br>
+<img src="https://dragon-baby.github.io/post-images/1594481592500.png" alt="" loading="lazy"><br>
+  比如上面的图片，在屏幕像素构成的网格中，每个像素中间有一个采样点，这个采样点用来决定这个像素是否用来构成三角形。上面的红色采样点被三角形包围，那么一个片段会根据对应的像素而生成。即使三角形的某些边穿过的像素，但只要采样点不在三角形内，那么对应的像素就不会参与构成三角形的片段，也就不会被片元着色器影响。<br>
+  那么最终屏幕上的三角形会是这样：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481602717.png" alt="" loading="lazy"><br>
+  由于屏幕像素数量的限制，一些像素会沿着三角形的边绘制，但有一些不会，这样也就会得到我们所提到的拥有锯齿感的结果。<br>
+  那么多重采样做的就是不像上面那样通过一次采样结果就决定三角形覆盖的像素范围，而是进行多次采样点的采样。我们不再只为每个像素分配一个中心采样点，而是为它们分配多个采样点（更多的采样点意味着更精确）。<br>
+<img src="https://dragon-baby.github.io/post-images/1594481611864.png" alt="" loading="lazy"><br>
+  上面左边的图是使用单次采样的结果，由于采样点不在三角形内，对应的像素不会包含在三角形的片段中。而右边我们使用多重采样，每个像素包含4个采样点，我们可以看到其中2个采样点在三角形内。<br>
+  我们判断有两个采样点在三角形内，接下来就是决定这个像素的颜色。我们最开始的猜想可能是为每个被覆盖的采样点使用片元着色器计算颜色，接着平均每个像素的所有采样点得到最终颜色。这样的话，针对上面的例子，我们就运行了两次片元着色器，并将颜色存储在这些采样点中。但这种猜想并不是多重采样的工作原理，毕竟这么做会损耗大量的性能。<br>
+  MSAA的工作原理是：片元着色器只会在每个像素上运行一次，无论三角形覆盖了多少采样点。片元着色器使用的顶点数据来自于像素的中心。接着MSAA会使用比一般情况下更大的深度或模板缓冲来决定采样点的覆盖。采样点的覆盖数量决定了每个像素会向帧缓冲贡献的颜色权重。上面的例子中，只有2个采样点被三角形覆盖，那么对应像素的颜色值会贡献一部分给帧缓冲的颜色，结果就是比较浅的蓝色。<br>
+  最终结果就是一个缓冲（高分辨率的深度或模板缓冲），其中所有的基本体的边缘都将变得平滑。下面是使用多重采样来决定三角形的覆盖像素的例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481622187.png" alt="" loading="lazy"><br>
+  上图中，每个像素包含4个采样点，蓝色的采样点被三角形覆盖，灰色的采样点不被覆盖。所有有采样点被覆盖的对应的像素就会通过运行一次片元着色器将输出的颜色直接存储在帧缓冲中（这里假设没有混合）。位于边缘的像素的采样点不一定全部覆盖在三角形内，那么这些像素只会贡献部分的颜色。<br>
+  对于每个像素，属于三角形的采样点越少，用来构成三角形的颜色就越淡（可以这么说,只是程度的大小）,采样结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481631940.png" alt="" loading="lazy"><br>
+  现在三角形的边缘被一些浅色的像素所柔和，可以说这个三角形的锯齿感消弱了很多。<br>
+  颜色值存储在每个像素中，但深度值和模板值存储在每个采样点中。在深度测试前，顶点的深度值会被插值到每个采样点中；而对于米板测试，我们将模板值存储在采样点中。这也就意味着，由于采样点数量的增加，深度和模板缓冲的大小也成倍增加。</p>
+<h2 id="在opengl中实现msaa">在OpenGL中实现MSAA</h2>
+<p>  如果想要使用MSAA，我们需要使用能够存储多于1个采样值的缓冲，即多重采样缓冲。<br>
+  大多数的窗口系统都提供了一个多重采样缓冲，我们可以通过下面的方法来设置每个像素的采样点的数量：</p>
+<pre><code class="language-cpp">glfwWindowHint(GLFW_SAMPLES, 4);
+</code></pre>
+<p>  接着我们创建窗口的话，屏幕的每个像素都会包含4个采样点，即缓冲的大小增长为4。<br>
+  接着我们告知OpenGL我们要使用多重采样，我们是使用glEnable(GL_MULTISAMPLE)开启。在大多数的OpenGL驱动中，多重采样是默认开启的，所以我们也可以不使用这行命令：</p>
+<pre><code class="language-cpp">glEnable(GL_MULTISAMPLE);  
+</code></pre>
+<p>  接下来的步骤和之前的渲染没有区别，就这么运行程序我们会得到边缘很柔和的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481678680.png" alt="" loading="lazy"><br>
+  这里给出原文参考代码：<a href="https://learnopengl.com/code_viewer.php?code=advanced/anti_aliasing_multisampling">Code</a>。</p>
+<h2 id="离屏msaa">离屏MSAA</h2>
+<p>  因为GLFW为我们自动创建了多重采样缓冲，所以MSAA变得非常简单，但如果我们想要使用自己的帧缓冲的话，我们还是得自己创建多重采样缓冲。就像在帧缓冲那张讲的那样，我们有两种方式创建多重采样缓冲来作为附加项附加到帧缓冲上：纹理附加项和渲染缓冲附加项。</p>
+<h3 id="多重采样纹理附加项">多重采样纹理附加项</h3>
+<p>  我们使用glTexImage2DMultiSample来创建存储多重采样点的纹理，同时纹理类型改为GL_TEXTURE_2D_MULTISAMPLE:</p>
+<pre><code class="language-cpp">glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tex);
+glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
+glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);  
+</code></pre>
+<p>  glTexImage2DMultiSample的第二个参数供我们自定义采样点的数量。如果最后一个参数设为GL_TRUE的话，在纹理中将会使用统一的采样位置，且每个像素的采样点的数量一致。<br>
+  接着我们将纹理附加到帧缓冲上，纹理类型为GL_TEXTURE_2D_MULTISAMPLE:</p>
+<pre><code class="language-cpp">glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, tex, 0); 
+</code></pre>
+<p>  那么当前的帧缓冲就用用多重采样颜色缓冲了，形式为一张纹理图片。</p>
+<h3 id="多重采样渲染缓冲对象">多重采样渲染缓冲对象</h3>
+<p>  创建多重采样渲染缓冲对象没什么区别，只是我们这次需要使用glRenderbufferStorageMultisample代替glRenderbufferStorage来配置渲染缓冲的内存：</p>
+<pre><code class="language-cpp">glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, width, height); 
+</code></pre>
+<p>  这个方法额外的数字参数是每个像素采样点的数量。</p>
+<h3 id="渲染到多重采样帧缓冲">渲染到多重采样帧缓冲</h3>
+<p>  一张多重采样纹理包含的信息远多于普通的纹理图片，所以我们需要缩小纹理或处理图片。我们通常使用glBlitFramebuffers来处理多重采样帧缓冲，做法是将纹理的一片区域从一个帧缓冲复制到另一个帧缓冲。<br>
+  glBlitFramebuffers的源区域和目标区域均由4个屏幕空间坐标定义。在帧缓冲一节提到过，如果我们绑定帧缓冲对象至GL_FRAMEBUFFER,我们同时绑定了读和绘制缓冲区，我们也可以分别绑定至GL_READ_FRAMEBUFFER和GL_DRAW_FRAMEBUFFER。glBlitFramebuffer从这两个缓冲区读取数据并决定谁是源帧缓冲，谁是目标帧缓冲。我们希望将多重采样帧缓冲的某一区域信息传递到默认的帧缓冲，我们可以这么做：</p>
+<pre><code class="language-cpp">glBindFramebuffer(GL_READ_FRAMEBUFFER, multisampledFBO);
+glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST); 
+</code></pre>
+<p>  如果就这么运行程序会得到与之前一样的结果，这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/11.anti_aliasing_offscreen/anti_aliasing_offscreen.cpp">Code</a>。<br>
+  但如果我们想要使用多重采样帧缓冲生成的纹理来进行一些后期处理呢？我们不能直接在片元着色器中使用这张纹理，我们能做的是将多重采样缓冲位块传输到一个拥有非多重采样纹理附加项的FBO，接着我们使用一般的颜色附加项纹理来进行后期处理。这也就意味着我们需要生成一个新的FBO，这个FBO的作用就是将多重采样缓冲转化为我们可以在片元着色器中使用的2D纹理。伪代码如下：</p>
+<pre><code class="language-cpp">unsigned int msFBO = CreateFBOWithMultiSampledAttachments();
+// then create another FBO with a normal texture color attachment
+...
+glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
+...
+while(!glfwWindowShouldClose(window))
+{
+    ...
+    
+    glBindFramebuffer(msFBO);
+    ClearFrameBuffer();
+    DrawScene();
+    // now resolve multisampled buffer(s) into intermediate FBO
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, msFBO);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    // now scene is stored as 2D texture image, so use that image for post-processing
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    ClearFramebuffer();
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+    DrawPostProcessingQuad();  
+  
+    ... 
+}
+</code></pre>
+<p>  接着我们在片元着色器中进行灰度处理就可以得到这样的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481697161.png" alt="" loading="lazy"><br>
+  但接着又存在一个问题，由于我们将多重采样缓冲转化为一张普通的屏幕纹理，一些类似于边缘检测的后期处理仍会造成边缘锯齿化。为了缓解这一问题，我们需要为纹理添加模糊效果，或者，编写我们自己的抗锯齿算法。</p>
+<h3 id="自定义抗锯齿算法">自定义抗锯齿算法</h3>
+<p>  其实我们可以直接将多重采样纹理放到片元着色器中使用，不需要创建一个新的FBO来作为传递中转站。GLSL提供了为每个采样点采样纹理图片的采样器类型，我们可以据此创建自定义的抗锯齿算法。<br>
+  我们需要将纹理的采样器类型替换掉：</p>
+<pre><code class="language-GLSL">uniform sampler2DMS screenTextureMS;    
+</code></pre>
+<p>  使用texelFetch方法可以检索每个采样点的颜色：</p>
+<pre><code class="language-GLSL">vec4 colorSample = texelFetch(screenTextureMS, TexCoords, 3);  // 第四个采样点
+</code></pre>
+<p>  这里暂时就不赘述了。<br>
+  最后，给出原文地址供参考：<a href="https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing">https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglshi-li-hua/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):实例化
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

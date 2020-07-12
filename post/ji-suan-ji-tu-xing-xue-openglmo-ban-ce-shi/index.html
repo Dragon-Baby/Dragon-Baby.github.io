@@ -1,0 +1,296 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):模板测试 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):模板测试
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-07 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="模板测试">模板测试</h1>
+<p>  在片元着色器处理片段后，模板测试可以被执行，类似于深度测试，有一些丢弃片段的选项。之后，剩余的片段进行深度测试，OpenGL接着丢弃更多的片段。模板测试基于一种新的缓冲--模板缓冲。一个模板缓冲的值的大小为8bit，每个像素总共由256个不同的模板值。注意：GLFW会自动创建模板缓冲，其它的不一定，根据实际情况而定。下面是模板缓冲的一个例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479648661.png" alt="" loading="lazy"><br>
+  模板缓冲首先用0填充，之后部分位置用一个开放矩形的1阵列填充。在模板测试之后，只有模板值为1的片段会被渲染出来。<br>
+  使用模板测试的流程大致如下：</p>
+<ul>
+<li>开启模板测试，允许写入模板缓冲。</li>
+<li>渲染对象，更新模板缓冲。</li>
+<li>禁止写入模板缓冲。</li>
+<li>渲染对象，这一次基于模板缓冲丢弃特定的片段。<br>
+  我们通过glEnable(GL_STENCIL_TEST)来开启模板测试：</li>
+</ul>
+<pre><code class="language-cpp">glEnable(GL_STENCIL_TEST);  
+</code></pre>
+<p>  接着，记得在渲染循环中清除模板缓冲来更新值：</p>
+<pre><code class="language-cpp">glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); 
+</code></pre>
+<p>  和深度测试一样，我们可以使用slStencilMask来设置掩码，掩码的值将与模板值进行与运算后写入模板缓冲。默认是设置为0xFF，不影响模板值，当然也可以设置为0x00来将模板值全部置为0（相当于禁止写入）：</p>
+<pre><code class="language-cpp">glStencilMask(0xFF); // 不变
+glStencilMask(0x00); // 置为0
+</code></pre>
+<h2 id="模板方法">模板方法</h2>
+<p>  和深度测试一样，模板测试也有一些特定的方法可以使用来控制模板测试。有两个方法可以使用：glStencilFunc和glStencilOp。<br>
+  glStencilFunc(GLenum func, GLint ref, GLuint mask)有三个参数：</p>
+<ul>
+<li>func：设置决定模板测试如何丢弃片段的参数，有以下几个选项:GL_NEVER, GL_LESS, GL_LEQUAL,GL_GREATER,GL_GEQUAL,GL_EQUAL,GL_NOTEQUAL,GL_ALWAYS。这些选项的解释和深度测试一样。</li>
+<li>ref：设置比较值，模板缓冲中的值会与该值比较。</li>
+<li>mask：在进行比较前和ref、模板缓冲值进行与运算的值，默认为0xFF。<br>
+  例如，可以这么使用这个方法：</li>
+</ul>
+<pre><code class="language-cpp">glStencilFunc(GL_EQUAL, 1, 0xFF);
+</code></pre>
+<p>  glStencilFunc只说明了如何通过模板测试和丢弃片段，glStencilOp则说明了如何更新缓冲。<br>
+  glStencilOp(GLenum sfail, GLenum dpfail, GLenum dppass)的三个参数的说明：</p>
+<ul>
+<li>sfail：如果模板测试失败的选项。</li>
+<li>dpfail：如果模板测试通过，但深度测试失败的选项。</li>
+<li>dppass：如果模板测试和深度测试都通过的选项。<br>
+  下面是可选的一些选项：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479684966.png" alt="" loading="lazy"><br>
+  默认情况下为glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP)。</li>
+</ul>
+<h1 id="物体描边">物体描边</h1>
+<p>  模板测试的其中一个应用是描边，效果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479700037.png" alt="" loading="lazy"><br>
+  这个应用在游戏中选择物体时非常有用。做法大致如下：</p>
+<ol>
+<li>开启模板缓冲写入。</li>
+<li>将模板的Op操作置为GL_ALWAYS，然后用1填满模板缓冲。</li>
+<li>渲染物体。</li>
+<li>禁用模板缓冲写入和深度测试。</li>
+<li>稍微放大要作为轮廓的物体。</li>
+<li>用额外的片元着色器为作为轮廓的物体赋予颜色。</li>
+<li>绘制轮廓物体。</li>
+<li>开启深度测试并将模板测试方法改为GL_KEEP。<br>
+  按照这样的流程，我们按常规建立一个轮廓物体的片元着色器(shaderSingleColor)并赋予一个颜色：</li>
+</ol>
+<pre><code class="language-GLSL">void main()
+{
+    FragColor = vec4(0.04, 0.28, 0.26, 1.0);
+}
+</code></pre>
+<p>  在绘制立方体时，先开启模板测试：</p>
+<pre><code class="language-cpp">glEnable(GL_STENCIL_TEST);
+</code></pre>
+<p>  接着在每一帧，如果模板测试和深度测试都成功，我们都替换模板缓冲中的值（接下来由glStencilFunc设置）：</p>
+<pre><code class="language-cpp">glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+</code></pre>
+<p>  我们将物体的模板值均设为1：</p>
+<pre><code class="language-cpp">glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+glStencilFunc(GL_ALWAYS, 1, 0xFF); // 所有片段均通过模板测试
+glStencilMask(0xFF); // 开启模板缓冲写入
+normalShader.use();
+DrawTwoContainers();
+</code></pre>
+<p>  接着绘制放大的物体来作为外轮廓，让外轮廓那一圈通过模板测试，并禁止模板缓冲写入：</p>
+<pre><code class="language-cpp">glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+glStencilMask(0x00); // 禁止模板缓冲写入
+glDisable(GL_DEPTH_TEST);
+shaderSingleColor.use(); 
+DrawTwoScaledUpContainers();
+</code></pre>
+<p>  完整流程如下：</p>
+<pre><code class="language-cpp">glEnable(GL_DEPTH_TEST);
+glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+  
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); 
+
+glStencilMask(0x00); //确保绘制地面不会更新模板缓冲
+normalShader.use();
+DrawFloor()  
+  
+glStencilFunc(GL_ALWAYS, 1, 0xFF); 
+glStencilMask(0xFF); 
+DrawTwoContainers();
+  
+glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+glStencilMask(0x00); 
+glDisable(GL_DEPTH_TEST);
+shaderSingleColor.use(); 
+DrawTwoScaledUpContainers();
+glStencilMask(0xFF);
+glStencilFunc(GL_ALWAYS, 1, 0xFF);   
+glEnable(GL_DEPTH_TEST);  
+</code></pre>
+<p>  结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594479715949.png" alt="" loading="lazy"><br>
+  这里给出原文参考代码：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/2.stencil_testing/stencil_testing.cpp">Code</a>。<br>
+  模板测试还有许多其它的用处，比如在后视镜中绘制纹理来确保是镜像纹理，或者实时渲染阴影（体积阴影技术）。<br>
+  最后，请多多参考原文：<a href="https://learnopengl.com/Advanced-OpenGL/Stencil-testing">https://learnopengl.com/Advanced-OpenGL/Stencil-testing</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglshen-du-ce-shi/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):深度测试
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

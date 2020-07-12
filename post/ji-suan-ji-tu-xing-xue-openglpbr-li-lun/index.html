@@ -1,0 +1,358 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):PBR理论 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):PBR理论
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-19 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>  PBR，全称phsically based rendering，即基于物理的渲染，是一系列基于相同理论的渲染技术的集合，更接近于真实的物理世界。因为PBR的目标是模拟真实的光照，它比Phong和Blinn-Phong更为真实，而且使用者可以不必调整一些不必要的参数区尽力模拟效果。<br>
+  PBR本身也并不是完全的真实的物理模拟，只是基于物理的规则。一个PBR光照模型，需要满足下面3个条件：</p>
+<ol>
+<li>基于微表面模型</li>
+<li>能量守恒</li>
+<li>使用基于物理规则的BRDF<br>
+  PBR是由迪士尼提出的，Epic进行了针对实时渲染的优化。它们的方法基于金属流程，被广泛运用于许多主流的引擎。下面是一个PBR渲染的例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484305516.png" alt="" loading="lazy"></li>
+</ol>
+<h1 id="微表面模型">微表面模型</h1>
+<p>  所有的PBR技术都基于微表面模型的理论。该理论定义了，所有微观尺度的表面都可以被描述为微小独立的镜面，被称为微表面。由于表面的粗糙度不同，这些微小的镜面的排列会很不同：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484316424.png" alt="" loading="lazy"><br>
+  如果表面越粗糙，微表面的排布越混乱。而表面越粗糙，在进行高光计算时，光线更倾向于杂乱无章地散射，就会造成更大范围的高光，相反，表面越光滑，光线的反射更有规律，结果的高光越小：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484329195.png" alt="" loading="lazy"><br>
+  实际上，没有一个表面是完全光滑的，但如果表面的微表面排布的混乱度很小，我们可以近似的认为平面是完全光滑的，我们可以使用粗糙度(roughness)参数来近似模拟表面粗糙程度。基于一个表面的粗糙度我们可以粗略的计算微表面贴合某个向量<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>h</mi></mrow><annotation encoding="application/x-tex">h</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">h</span></span></span></span>的比率，这个向量<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>h</mi></mrow><annotation encoding="application/x-tex">h</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">h</span></span></span></span>是位于光源方向<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>l</mi></mrow><annotation encoding="application/x-tex">l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>和观察方向<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span></span></span></span>之间一半的向量，这在blinn-phong模型那里使用过。<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>h</mi></mrow><annotation encoding="application/x-tex">h</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">h</span></span></span></span>向量这么计算：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484339655.png" alt="" loading="lazy"><br>
+  对齐到这个<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>h</mi></mrow><annotation encoding="application/x-tex">h</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">h</span></span></span></span>向量的微表面越多，高光越强，越尖锐。下面是粗糙度0-1的高光效果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484351162.png" alt="" loading="lazy"></p>
+<h2 id="能量守恒">能量守恒</h2>
+<p>  微表面模型的近似采用一组能量守恒公式：离开表面的光的能量不能高于与表面发生作用前的光的能量，即能量会有一部分损失在物体内部。从上面的图中我们看到，粗糙度越高，高光范围越大，但高光的亮度越低。<br>
+  对于能量守恒公式，我们需要区分漫反射和高光。当一束光线碰撞表面时，它就被分为折射部分和反射部分，反射部分形成高光，并不进入表面，这是广义上的高光光照。这是部分留在物体内部分吸收，这是广义上的漫反射光照。<br>
+  其实和广义上的模型相比还是有一细微差别，折射光线并不会马上被吸收。在物理层面，我们可以将光线认为是一个带有能量能量体，在失去所有能量前会一直向前移动，而失去能量的方式是碰撞。每个物体都可以考虑为内部包含大量的粒子，这些粒子会作为碰撞体和光线进行碰撞，每次碰撞，这写粒子会吸收一部分光线的能量并转化为热能：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484363685.png" alt="" loading="lazy"><br>
+  所有进入物体内部的折射光线的能量并不会被完全吸收，大多数都会向各个方向散射离开表面，而这些能量被吸收过的光线会参与表面的漫反射颜色计算。在PBR中，我们简化这一流程，我们假定所有的折射光线被吸收的能量接着在一个很小的范围内散射，忽略会离开表面一定距离的光线。有一些着色技术考虑了这些离开一定距离的光线，这一技术称为次表面散射，被应用于模拟皮肤、大理石蜡烛这些材质。<br>
+  一个额外的差别是金属和非金属表面的区别(也被称为电解质和非电解质)。金属表面的反射和折射所基于的原则和上述一致，但折射光线全被吸收不考虑散射，这就意味着金属表面不考虑漫反射颜色只考虑高光。而非金属表面和上面的原则完全一致。正因为这种金属和非金属的差别，它们在PBR流程中会被区别对待。<br>
+  反射和折射的区别也给予了我们另一个不同于能量守恒公式的结论：它们两个是相互排斥的。当光线反射时它永远不会被吸收能量，所以进入表面的能量就全部都是折射光线。<br>
+  这样我们可以根据能量守恒公式首先计算高光部分，代表原光线能量被反射的部分，接着剩下的部分的能量直接用来计算折射，即漫反射部分|</p>
+<pre><code class="language-GLSL">float kS = calculateSpecularComponent(...); // reflection/specular fraction
+float kD = 1.0 - kS;                        // refraction/diffuse  fraction
+</code></pre>
+<p>  通过这种方式，我们同时拥有了进入光线的反射值和折射值，同时也秉承了能量守恒原则。通过这种方式，让反射值和折射值超过1是不可能的，这确保了它们的能量值的和不会超过进入的光线的能量。</p>
+<h2 id="反射方程">反射方程</h2>
+<p>  根据上面讲述的理论，我们可以得出一个名为渲染方程的工具，这个方程时目前模拟光照的最好的方法。基于物理的渲染使用的渲染方程的版本称为反射方程，下面给出反射方程：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484379361.png" alt="" loading="lazy"><br>
+  为了了解这个复杂的方程，我们先了解一下辐射度测定。辐射度测定是一种对电磁波的测定方法，包括可见光。有几个辐射度测定的参数我们可以用来测量测过平面的光和方向，但我们只考虑于反射方程有关的辐射率，这里标记为<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>L</mi></mrow><annotation encoding="application/x-tex">L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault">L</span></span></span></span>。辐射率用来度量从某一单一方向射来的光的强度，我们可以将辐射度看作是一组物理量的结合：<br>
+  辐射通量：辐射通量<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Φ</mi></mrow><annotation encoding="application/x-tex">\Phi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">Φ</span></span></span></span>是以瓦特为单位的用来衡量光源的透射能量。光有多种不同波长的能量组合而成，每种波长联系一个特定的颜色，因此一个光源发出的能量可以被认为与波长构成一个函数关系，波长在390nm到700nm之间的属于可见光的范围。下面是每种光的能量和波长的关系：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484391088.png" alt="" loading="lazy"><br>
+  辐射通量就是这么一个用来描述上述波长与光强函数总区域面积的量。为了使描述简单化，我们常常用RGB编码来表示光的颜色。<br>
+  立体角：立体角，用<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>ω</mi></mrow><annotation encoding="application/x-tex">\omega</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span></span></span>表示，用来描述一个区域投射到单位圆上的大小，下面是示例图：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484400855.png" alt="" loading="lazy"><br>
+  想象一下从单位圆的中心沿着区域的方向观察，落在单位圆上的区域就是立体角。<br>
+  辐射强度：辐射强度是每个立体角范围上的辐射通量，比如，有一束向四周发光的全方位光源，我们在立体角的范围描述辐射强度：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484411048.png" alt="" loading="lazy"><br>
+  辐射强度的等式如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484420542.png" alt="" loading="lazy"><br>
+  通过辐射通量、辐射强度以及立体角，我们就可以得到辐射率的等式。辐射率被描述为某面积内(A)在单位圆中心所接收到的沿某一立体角接受得到的辐射强度：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484432942.png" alt="" loading="lazy"><br>
+  辐射率用来测量某一区域的光的辐射度，通过入射角进行缩放。如果我们考虑一个立体角和一个无限小的区域A，我们可以使用辐射率来度量入射光在空间中某一点的通量，接着我们将立体角用光的方向向量替代，用一个点<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">p</span></span></span></span>替代区域<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault">A</span></span></span></span>，这样的话，我们就可以直接在着色器中逐片段的计算某一光源的光照。<br>
+  实际计算辐射率时，我们考虑所有入射到某一点<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">p</span></span></span></span>的光线，这些所有辐射率的总和被称为辐照率。有了相关知识我们再回头看反射方程：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484445329.png" alt="" loading="lazy"><br>
+  我们用L表示某一点p从某一方向（某一无线小的立体角<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>ω</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">{\omega}_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>）接受的光的辐射率，注意之前的<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>c</mi><mi>o</mi><mi>s</mi><mi>θ</mi></mrow><annotation encoding="application/x-tex">cos\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">c</span><span class="mord mathdefault">o</span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">θ</span></span></span></span>，可以有光的入射方向和法线点乘得到，即<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo>⋅</mo><msub><mi>ω</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">n \cdot {\omega}_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.44445em;vertical-align:0em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>L</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">L_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>是辐射率的在某个点<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">p</span></span></span></span>的总和，沿观察者方向<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>ω</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">{\omega}_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。<br>
+  反射方程围绕辐照率展开，是某个点所有入射光的辐射率综总和，不只是某一单一方向的入射光，而是所有在一个以<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">p</span></span></span></span>为中心点的半球<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Ω</mi></mrow><annotation encoding="application/x-tex">\Omega</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">Ω</span></span></span></span>内的所有入射光。图例：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484458073.png" alt="" loading="lazy"><br>
+  为了计算所有在半球内的辐射率的值的和，我们基于所有在半球内的光的入射方向<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>ω</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">{\omega}_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>进行积分计算。在OpenGL中，对这个积分我们可以使用黎曼和进行计算：</p>
+<pre><code class="language-GLSL">int steps = 100;
+float sum = 0.0f;
+vec3 P    = ...;
+vec3 Wo   = ...;
+vec3 N    = ...;
+float dW  = 1.0f / steps;
+for(int i = 0; i &lt; steps; ++i) 
+{
+    vec3 Wi = getNextIncomingLightDir(i);
+    sum += Fr(P, Wi, Wo) * L(P, Wi) * dot(N, Wi) * dW;
+}
+</code></pre>
+<p>  我们将积分区域分为按w所在轴100等分，对每一份dW值，我们计算相应的辐射率，循环将值叠加得到辐照率的结果。<br>
+  反射方程将半球<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Ω</mi></mrow><annotation encoding="application/x-tex">{\Omega}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord"><span class="mord">Ω</span></span></span></span></span>内照射到<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">p</span></span></span></span>点的入射光的辐射率叠加起来，经由<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>f</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">f_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>缩放，并返回从观察者方向的反射光辐射率<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>L</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">L_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>的总和。入射光辐射率可以来自光源或环境贴图。<br>
+  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>f</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">f_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>方法代表BRDF方程，也就是双向反射分布方程，可以基于物体的材质属性缩放入射光的辐射率权重。</p>
+<h2 id="brdf">BRDF</h2>
+<p>  BRDF，即双向反射分布方程，将入射光方向，反射光方向，法线，表面粗糙度作为输入参数。BRDF近似描述了每个输入光对最后反射光的贡献，例如，一个类似镜面的表面，BRDF方程对几乎所有的输入光返回0值，除了与反射光方向<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>ω</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">{\omega}_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>呈反射关系的输入光返回1值。<br>
+  BRDF基于微表面模型近似模拟材质的反射和折射属性。为了让BRDF的结果物理上可信，它必须遵循能量守恒方程。技术上来说，Blinn-Phong其实是使用相同的<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>ω</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">{\omega}_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>ω</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">{\omega}_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">ω</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>作为输入的BRDF，但由于Blinn-Phong并不遵守能量守恒定律，它也不是基于物理的模拟。目前存在许多不同种类的BRDF来基于物理模拟表面材质，对于实时渲染的PBR流程使用的是Cook-Torrance BRDF。<br>
+  Cook-Torrance BRDF包含一个漫反射和一个高光部分：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484472706.png" alt="" loading="lazy"><br>
+  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>k</mi><mi>d</mi></msub></mrow><annotation encoding="application/x-tex">k_d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.03148em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">d</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>是入射光折射的能量比例，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>k</mi><mi>s</mi></msub></mrow><annotation encoding="application/x-tex">k_s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03148em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>是入射光反射的能量比例。等式右边的第一部分是漫反射部分<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>f</mi><mrow><mi>l</mi><mi>a</mi><mi>m</mi><mi>b</mi><mi>e</mi><mi>r</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">f_{lambert}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight" style="margin-right:0.01968em;">l</span><span class="mord mathdefault mtight">a</span><span class="mord mathdefault mtight">m</span><span class="mord mathdefault mtight">b</span><span class="mord mathdefault mtight">e</span><span class="mord mathdefault mtight" style="margin-right:0.02778em;">r</span><span class="mord mathdefault mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，这是名为Lambert的一种漫反射模拟，定义如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484485145.png" alt="" loading="lazy"><br>
+  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">c</span></span></span></span>是反照率或表面的颜色，为什么除以<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>π</mi></mrow><annotation encoding="application/x-tex">\pi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">π</span></span></span></span>在之后讲解IBL时详细说明。<br>
+  高光部分这样描述：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484496871.png" alt="" loading="lazy"><br>
+  Cook-Torrance高光BRDF有三个函数和分母的一个标准化因数构成，D、F、G各自代表近似模拟高光某一属性的函数，即法线分布函数，菲涅尔等式，几何函数：</p>
+<ul>
+<li>法线分布函数：估计贴近中间向量的微表面数量，由表面的粗糙度影响。这是近似模拟微表面的最首要的方法</li>
+<li>几何函数：描述微表面的自屏蔽属性。当某一平面相对粗糙时，平面的微表面可以遮蔽其它的微表面，降低反射光的强度。</li>
+<li>菲涅尔等式：描述了不同表面角度的表面的反射率。<br>
+  对上面三个函数有多种不同的模拟方式，这里我们选取虚幻4中的模拟方式。</li>
+</ul>
+<h3 id="法线分布函数">法线分布函数</h3>
+<p>  这里我们使用Trowbridge-Reitz GGX：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484508383.png" alt="" loading="lazy"><br>
+  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>h</mi></mrow><annotation encoding="application/x-tex">h</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">h</span></span></span></span>是微表面的中间向量，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span></span></span></span>为表面的粗糙度。在GLSL中发现分布函数这样表示：</p>
+<pre><code class="language-GLSL">
+float DistributionGGX(vec3 N, vec3 H, float a)
+{
+    float a2     = a*a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+	
+    float nom    = a2;
+    float denom  = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom        = PI * denom * denom;
+	
+    return nom / denom;
+}
+</code></pre>
+<h3 id="几何函数">几何函数</h3>
+<p>  几何函数描述的是每个微表面之间的相互遮挡关系：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484522261.png" alt="" loading="lazy"><br>
+  几何函数将材质粗糙度作为输入，包括法线和观察方向，这里使用 Schlick-GGX：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484535378.png" alt="" loading="lazy"><br>
+  这里的<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span></span></span></span>是对<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span></span></span></span>的重映射，我们对直接光照和IBL使用不同的等式：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484549868.png" alt="" loading="lazy"><br>
+  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span></span></span></span>所代表的粗糙度每种引擎都不一样，之后的章节会讲解。<br>
+  为了更有效的估计几何函数，我们将观察方向和入射光方向均考虑进来，我是史密斯方法进行合并：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484565109.png" alt="" loading="lazy"><br>
+  右侧的<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>G</mi><mrow><mi>s</mi><mi>u</mi><mi>b</mi></mrow></msub></mrow><annotation encoding="application/x-tex">G_{sub}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">s</span><span class="mord mathdefault mtight">u</span><span class="mord mathdefault mtight">b</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>由Schlick-GGX给出，下面是不同粗糙度的几何函数的效果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484577040.png" alt="" loading="lazy"><br>
+  几何函数在GLSL中实现：</p>
+<pre><code class="language-GLSL">float GeometrySchlickGGX(float NdotV, float k)
+{
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return nom / denom;
+}
+  
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float k)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx1 = GeometrySchlickGGX(NdotV, k);
+    float ggx2 = GeometrySchlickGGX(NdotL, k);
+	
+    return ggx1 * ggx2;
+}
+</code></pre>
+<h3 id="菲涅尔等式">菲涅尔等式</h3>
+<p>  菲涅尔等式描述了不同观察视角的反射光和折射光的比率。每个表面或材质都有一个基础反射率，对应垂直观察表面，从其它角度观察反射会更加明显。举个例子，看看周围的桌子，或木制，或金属制，从垂直方向观察的话会得到基础反射率的效果，如果近乎平行表面观察的方向观察表面，反射会非常明显。所有的表面从这种近乎平行的方向观察得到的强烈反射结果就是菲涅尔效应。<br>
+  菲涅尔等式本身十分复杂，这里使用Fresnel-Schlick来近似模拟：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484593186.png" alt="" loading="lazy"><br>
+  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>F</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">F_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>代表表面的基础反射率，经由折射或IOR的索引进行计算下面是菲涅尔效应的图例，可以看到越靠近边缘，反射光越强烈：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484602604.png" alt="" loading="lazy"><br>
+  注意，Fresnel-Schlick是针对非电解质表面进行定义的，对于电解质表面，因为不考虑折射因素，所以无法计算<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>F</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">F_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，可能不能直接使用。对于电解质，我们可以预先计算垂直观察表面的的<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>F</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">F_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，再在其它角度上对该值插值，每一个角度都使用Fresnel-Schlick。<br>
+  下面列举了一下不同材质的基础反射率:<br>
+<img src="https://dragon-baby.github.io/post-images/1594484612612.png" alt="" loading="lazy"><br>
+  可以观察到，非电解质的基础反射率不会超过0.17，大多数导体的基础反射率在0.5-1.0。同时，导体的基础反射率是着色的，也就是可以用某一RGB元组。<br>
+  由于金属和非金属的区别，我们在金属流程中对描述材质使用一个额外的名为金属度的参数，用来判断一个表面是金属还是非金属。<br>
+  通过预先计算<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>F</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">F_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，我们可以让金属和非金属都是用Fresnel-Schlick估计菲涅尔效应，而且如果一个材质是金属的话，我们还需要对<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>F</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">F_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>着色，GLSL中这么做：</p>
+<pre><code class="language-GLSL">vec3 F0 = vec3(0.04);
+F0      = mix(F0, surfaceColor.rgb, metalness);
+</code></pre>
+<p>  Fresnel-Schlick函数实现：</p>
+<pre><code class="language-GLSL">vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+</code></pre>
+<h2 id="cook-torrance反射方程">Cook-Torrance反射方程</h2>
+<p>  通过Cook-Torrance BRDF的每个组件，我们可以获得最终的反射方程：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484638671.png" alt="" loading="lazy"><br>
+  这个反射方程完整的描述了一个PBR模型。</p>
+<h1 id="pbr材质">PBR材质</h1>
+<p>  在实际工作中，往往使用各种贴图来控制PBR流程中的表面的参数，描述了平面中的某一点对光照的反应，即：这个点的金属度，粗糙度，平面如何应对不同波长的光。<br>
+  下面是PBR流程中使用的几张贴图，并使用这几张贴图进行渲染输出：<br>
+<img src="https://dragon-baby.github.io/post-images/1594484648039.png" alt="" loading="lazy"></p>
+<ul>
+<li>Albedo，反照率：即表面的基础颜色。</li>
+<li>Normal，法线：法线贴图。</li>
+<li>Metallic, 金属度 ：用来判断每一个片段的金属度，往往使用灰度图。</li>
+<li>Roughness, 粗糙度： 用来判断每一个片段的粗糙度，使用灰度图。</li>
+<li>AO， 环境光遮蔽：环境光遮蔽贴图。</li>
+</ul>
+<p>  最后，给出原文地址供参考：<a href="https://learnopengl.com/PBR/Theory">https://learnopengl.com/PBR/Theory</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglssao/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):SSAO
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

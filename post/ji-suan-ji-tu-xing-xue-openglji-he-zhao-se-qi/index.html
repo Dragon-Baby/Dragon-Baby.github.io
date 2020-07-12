@@ -1,0 +1,524 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):几何着色器 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):几何着色器
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-10 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="几何着色器">几何着色器</h1>
+<p>  在渲染管线中，位于顶点着色器和片元着色器之间有一个可选的着色器为几何着色器。几何着色器将一系列可以装配为基本体的顶点作为输入，可以对这些顶点进行一些合适的操作再送往下一阶段。几何着色器最有意思的地方在于可以将原来的基本体转化为完全不同的基本体。<br>
+  一个几何着色器的例子：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (points) in;
+layout (line_strip, max_vertices = 2) out;
+
+void main() {    
+    gl_Position = gl_in[0].gl_Position + vec4(-0.1, 0.0, 0.0, 0.0); 
+    EmitVertex();
+
+    gl_Position = gl_in[0].gl_Position + vec4( 0.1, 0.0, 0.0, 0.0);
+    EmitVertex();
+    
+    EndPrimitive();
+} 
+</code></pre>
+<p>  在几何着色器的开头我们声明输入基本体的类型（从顶点着色器接收），我们通过在in关键字前用layout说明符声明类型，有以下几种类型可选：</p>
+<ul>
+<li>points：绘制GL_POINTS基本体。</li>
+<li>lines：绘制GL_LINES或GL_LINE_STRIP。</li>
+<li>lines_adjacency：GL_LINES_ADJACENCY或GL_LINE_STRIP_ADJACENCY。</li>
+<li>triangles：GL_TRIANGLES,GL_TRIANGLE_STRIP或GL_TRIANGLE_FAN。</li>
+<li>triangles_adjacency：GL_TRIANGLES_ADJACENCY或GL_TRIANGLE_STRIP_ADJACENCY。<br>
+  接着声明要输出的基本体类型，我们通过在out关键字前用layout说明符声明类型，有以下几种类型:</li>
+<li>points</li>
+<li>line_strip</li>
+<li>triangle_strip<br>
+  作为输出，我们也需要声明每个输出的最大点数，对于line_strip输出，我们可以设置最大点数为2。<br>
+  line_strip表明我们连续链接每个点构成线段：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481111256.png" alt="" loading="lazy"><br>
+  为了检索上一着色器阶段的结果，GLSL提供内建变量gl_in：</li>
+</ul>
+<pre><code class="language-GLSL">in gl_Vertex
+{
+    vec4  gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+} gl_in[];  
+</code></pre>
+<p>  gl_in是一个接口块的实例，内部包含一些变量。注意gl_in是一个数组，这是因为大多数基本体包含一个以上的顶点，几何着色器将一个基本体的所有顶点作为输入。<br>
+  对于来自顶点着色器的数据我们可以使用几何着色器的EmitVertex和EndPrimitive方法来生成新的数据。几何着色器要求至少输出一个我们所定义类型的基本体，下面的例子我们生成了一个连续线段基本体：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (points) in;
+layout (line_strip, max_vertices = 2) out;
+  
+void main() {    
+    gl_Position = gl_in[0].gl_Position + vec4(-0.1, 0.0, 0.0, 0.0); 
+    EmitVertex();
+
+    gl_Position = gl_in[0].gl_Position + vec4( 0.1, 0.0, 0.0, 0.0);
+    EmitVertex();
+    
+    EndPrimitive();
+}   
+</code></pre>
+<p>  每当我们使用一次EmitVertex，就会在gl_Position位置处生成一个顶点用来作为输出的基本体。在EndPrimitive使用后，所有生成的顶点会装配为一个基本体作为输出。如果不断调用EndPrimitive，那么也会不断使用生成的两个顶点装配基本体。下面是我们调用四次EndPrimitive并作出一些位移的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481130714.png" alt="" loading="lazy"></p>
+<h2 id="使用几何着色器">使用几何着色器</h2>
+<p>  为了体现几何着色器的用处，我们构建一个场景，绘制下面4个顶点：</p>
+<pre><code class="language-cpp">float points[] = {
+	-0.5f,  0.5f, // top-left
+	 0.5f,  0.5f, // top-right
+	 0.5f, -0.5f, // bottom-right
+	-0.5f, -0.5f  // bottom-left
+};  
+</code></pre>
+<p>  我们创建一个最简单的顶点着色器，将顶点绘制在xy平面上：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec2 aPos;
+
+void main()
+{
+    gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0); 
+}
+</code></pre>
+<p>  接着在片元着色器中为顶点设置绿色：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+
+void main()
+{
+    FragColor = vec4(0.0, 1.0, 0.0, 1.0);   
+}  
+</code></pre>
+<p>  接着创建VAO和VBO并绘制顶点：</p>
+<pre><code class="language-cpp">shader.use();
+glBindVertexArray(VAO);
+glDrawArrays(GL_POINTS, 0, 4);
+</code></pre>
+<p>  如果就这么运行会发现漆黑的场景中有四个绿色的顶点：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481163751.png" alt="" loading="lazy"><br>
+  我们接着使用几何着色器：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (points) in;
+layout (points, max_vertices = 1) out;
+
+void main() {    
+    gl_Position = gl_in[0].gl_Position; 
+    EmitVertex();
+    EndPrimitive();
+}  
+</code></pre>
+<p>  我们在输入的顶点位置处生成一个顶点输出。<br>
+  记住几何着色器也需要编译和链接到着色器程序：</p>
+<pre><code class="language-cpp">geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+glShaderSource(geometryShader, 1, &amp;gShaderCode, NULL);
+glCompileShader(geometryShader);  
+...
+glAttachShader(program, geometryShader);
+glLinkProgram(program);  
+</code></pre>
+<p>  运行添加了几何着色器的程序会发现没有什么变化：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481187440.png" alt="" loading="lazy"><br>
+  但这也证明我们的几何着色器起了作用。</p>
+<h2 id="构建房子">构建房子</h2>
+<p>  接下来我们尝试在每个顶点的位置画一些简单的图形，比如一座房子。我们将几何着色器的输出类型改为triangle_strip并绘制三个三角形。<br>
+  triangle_strip是一种很有效地绘制三角形的方式。绘制一个三角形后会在这个三角形的基础上邻接绘制另一个三角形，即每3个邻接的顶点会组成一个三角形。比如我们总共有6个顶点，我们就会得到下面的三角形顺序：(1,2,3),(2,3,4),(3,4,5),(4,5,6)，总共构成4个三角形。一个triangle_strip至少需要3个顶点，对于N个顶点的triangle_strip总共可绘制N-2个三角形。对于6个顶点，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481202224.png" alt="" loading="lazy"><br>
+  那么对于房子的形状，我们可以在输入顶点的基础上生成5个顶点，并绘制3个三角形：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481218857.png" alt="" loading="lazy"><br>
+  那么我们需要按顺序生成顶点，几何着色器代码如下：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (points) in;
+layout (triangle_strip, max_vertices = 5) out;
+
+void build_house(vec4 position)
+{    
+    gl_Position = position + vec4(-0.2, -0.2, 0.0, 0.0);    // 1:bottom-left
+    EmitVertex();   
+    gl_Position = position + vec4( 0.2, -0.2, 0.0, 0.0);    // 2:bottom-right
+    EmitVertex();
+    gl_Position = position + vec4(-0.2,  0.2, 0.0, 0.0);    // 3:top-left
+    EmitVertex();
+    gl_Position = position + vec4( 0.2,  0.2, 0.0, 0.0);    // 4:top-right
+    EmitVertex();
+    gl_Position = position + vec4( 0.0,  0.4, 0.0, 0.0);    // 5:top
+    EmitVertex();
+    EndPrimitive();
+}
+
+void main() {    
+    build_house(gl_in[0].gl_Position);
+}  
+</code></pre>
+<p>  我们对每个生成的顶点添加一些偏移量，最终构成一个房子的形状。（由于我们传入的基本体为点，只有一个顶点，所以使用gl_in[0]）。<br>
+  最终结果如下（左侧是绘制三角形，右侧是线框显示）：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481232285.png" alt="" loading="lazy"><br>
+  为了给房子增添一些色彩，我们给每个顶点赋予一个颜色向量属性：</p>
+<pre><code class="language-cpp">float points[] = {
+    // xy坐标      // 颜色
+    -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
+     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
+     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
+    -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
+};  
+</code></pre>
+<p>  顶点着色器进行以下修改，可以使用我们之前讲过的接口块：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec3 aColor;
+
+out VS_OUT {
+    vec3 color;
+} vs_out;
+
+void main()
+{
+    gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0); 
+    vs_out.color = aColor;
+}  
+</code></pre>
+<p>  同样在几何着色器中也要定义同样接口块的：</p>
+<pre><code class="language-GLSL">in VS_OUT {
+    vec3 color;
+} gs_in[];  
+</code></pre>
+<p>  我们也要定义一个颜色向量作为输出传入片元着色器：</p>
+<pre><code class="language-GLSL">out vec3 fColor;  
+</code></pre>
+<p>  和接着在生成顶点基本体前我们为fColor赋值：</p>
+<pre><code class="language-GLSL">fColor = gs_in[0].color; // gs_in[0] since there's only one input vertex
+gl_Position = position + vec4(-0.2, -0.2, 0.0, 0.0);    // 1:bottom-left   
+EmitVertex();   
+gl_Position = position + vec4( 0.2, -0.2, 0.0, 0.0);    // 2:bottom-right
+EmitVertex();
+gl_Position = position + vec4(-0.2,  0.2, 0.0, 0.0);    // 3:top-left
+EmitVertex();
+gl_Position = position + vec4( 0.2,  0.2, 0.0, 0.0);    // 4:top-right
+EmitVertex();
+gl_Position = position + vec4( 0.0,  0.4, 0.0, 0.0);    // 5:top
+EmitVertex();
+EndPrimitive();  
+</code></pre>
+<p>  所有生成的顶点将会使用输入顶点的颜色信息，结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481246412.png" alt="" loading="lazy"><br>
+  当然，我们也可以在任意一个生成的顶点前为fColor赋值，比如为最后一个顶点赋值白色：</p>
+<pre><code class="language-GLSL">fColor = gs_in[0].color; 
+gl_Position = position + vec4(-0.2, -0.2, 0.0, 0.0);    // 1:bottom-left   
+EmitVertex();   
+gl_Position = position + vec4( 0.2, -0.2, 0.0, 0.0);    // 2:bottom-right
+EmitVertex();
+gl_Position = position + vec4(-0.2,  0.2, 0.0, 0.0);    // 3:top-left
+EmitVertex();
+gl_Position = position + vec4( 0.2,  0.2, 0.0, 0.0);    // 4:top-right
+EmitVertex();
+gl_Position = position + vec4( 0.0,  0.4, 0.0, 0.0);    // 5:top
+fColor = vec3(1.0, 1.0, 1.0);
+EmitVertex();
+EndPrimitive();  
+</code></pre>
+<p>  运行结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481259090.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/9.1.geometry_shader_houses/geometry_shader_houses.cpp">Code</a>。</p>
+<h1 id="炸开物体">炸开物体</h1>
+<p>  这里的炸开物体并不是真的要让某个物体爆炸，我们将一个模型的每个三角形在一段时间内都沿法线偏移一段距离来实现这种感觉，大概是这样：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481271755.png" alt="" loading="lazy"><br>
+  为了实现这一目的，我们需要计算每个三角形的法线，通过三个顶点的位置可以很简单地计算出来，通过构成两个向量接着叉乘得到结果。下面再几何着色器器中实现这一方法：</p>
+<pre><code class="language-GLSL">vec3 GetNormal()
+{
+   vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
+   vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
+   return normalize(cross(a, b));
+} 
+</code></pre>
+<p>  接下来实现炸开方法：</p>
+<pre><code class="language-GLSL">vec4 explode(vec4 position, vec3 normal)
+{
+    float magnitude = 2.0;
+    vec3 direction = normal * ((sin(time) + 1.0) / 2.0) * magnitude; 
+    return position + vec4(direction, 0.0);
+} 
+</code></pre>
+<p>  我们在计算沿法线方向的偏移时，使用了sin方法，以一个统一变量time作为参数，+1/2将范围修改到0-1。<br>
+  下面是几何着色器中的实现：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3) out;
+
+in VS_OUT {
+    vec2 texCoords;
+} gs_in[];
+
+out vec2 TexCoords; 
+
+uniform float time;
+
+vec4 explode(vec4 position, vec3 normal) { ... }
+
+vec3 GetNormal() { ... }
+
+void main() {    
+    vec3 normal = GetNormal();
+
+    gl_Position = explode(gl_in[0].gl_Position, normal);
+    TexCoords = gs_in[0].texCoords;
+    EmitVertex();
+    gl_Position = explode(gl_in[1].gl_Position, normal);
+    TexCoords = gs_in[1].texCoords;
+    EmitVertex();
+    gl_Position = explode(gl_in[2].gl_Position, normal);
+    TexCoords = gs_in[2].texCoords;
+    EmitVertex();
+    EndPrimitive();
+}  
+</code></pre>
+<p>  注意我们在生成每个顶点时重新赋予了纹理坐标。<br>
+  在设置统一变量time后，我们就可以炸开模型了。<br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/9.2.geometry_shader_exploding/geometry_shader_exploding.cpp">Code</a>。</p>
+<h1 id="绘制法线">绘制法线</h1>
+<p>  在进行灯光着色时，常见的错误原因时法线计算错误，我们可以将法线绘制出来，以此判断是否是法线出了问题，我们在几何着色器中设置法线。<br>
+  做法是：先不使用几何着色器绘制场景，接着使用几何着色器再绘制一边场景来显示法线。用代码实现大概是这样：</p>
+<pre><code class="language-cpp">shader.use();
+DrawScene();
+normalDisplayShader.use();
+DrawScene();
+</code></pre>
+<p>  我们在顶点着色器中使用模型自带的法线信息。为适应缩放和旋转的影响（view和model），我们先使用常规的手段变换法线再将其转置切割空间。这是因为几何着色器接受来自切割空间的坐标所以我们也要将法线转置切割空间。顶点着色器代码：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+
+out VS_OUT {
+    vec3 normal;
+} vs_out;
+
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0); 
+    mat3 normalMatrix = mat3(transpose(inverse(view * model)));
+    vs_out.normal = normalize(vec3(projection * vec4(normalMatrix * aNormal, 0.0)));
+</code></pre>
+<p>  我们通过接口块传递法线，在几何着色器中这样实现：</p>
+<pre><code class="language-GLSL">#version 330 core
+layout (triangles) in;
+layout (line_strip, max_vertices = 6) out;
+
+in VS_OUT {
+    vec3 normal;
+} gs_in[];
+
+const float MAGNITUDE = 0.4;
+
+void GenerateLine(int index)
+{
+    gl_Position = gl_in[index].gl_Position;
+    EmitVertex();
+    gl_Position = gl_in[index].gl_Position + vec4(gs_in[index].normal, 0.0) * MAGNITUDE;
+    EmitVertex();
+    EndPrimitive();
+}
+
+void main()
+{
+![](https://upload-images.jianshu.io/upload_images/18672981-8c4bef7d303fed22.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+    GenerateLine(0); // first vertex normal
+    GenerateLine(1); // second vertex normal
+    GenerateLine(2); // third vertex normal
+}  
+</code></pre>
+<p>  每个法线的绘制为2个顶点，第一个顶点为原三角形顶点位置，第二个顶点我们沿原顶点的法线方向偏移一段距离，我们通过MAGNITUDE来限制显示法线的大小。<br>
+  我们用黄色显示法线：</p>
+<pre><code class="language-GLSL">#version 330 core
+out vec4 FragColor;
+
+void main()
+{
+    FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+}  
+</code></pre>
+<p>  最后结果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594481292541.png" alt="" loading="lazy"><br>
+  这里给出原文代码参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/9.3.geometry_shader_normals/normal_visualization.cpp">Code</a>。<br>
+  最后，给出原文地址供参考：<a href="https://learnopengl.com/Advanced-OpenGL/Geometry-Shader">https://learnopengl.com/Advanced-OpenGL/Geometry-Shader</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglgao-ji-glsl/" class="post-title gt-a-link">
+                    计算机图形学(OpenGL):高级GLSL
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>计算机图形学(OpenGL):纹理 | Dragon&#39;s blog</title>
+<link rel="shortcut icon" href="https://dragon-baby.github.io/favicon.ico?v=1594529730873">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dragon-baby.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Dragon&#39;s blog
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    计算机图形学(OpenGL):纹理
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-05-01 ·
+                    </time>
+                    
+                        <a href="https://dragon-baby.github.io/tag/rA2TvoHVk/" class="post-tags">
+                            # OpenGL
+                        </a>
+                    
+                        <a href="https://dragon-baby.github.io/tag/KE_SRz2iC/" class="post-tags">
+                            # 图形学
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="纹理">纹理</h1>
+<p>  经过前面的学习，我们可以通过赋予顶点颜色属性来丰富图形的细节，但若是为了获的更为真实的图像，手动的赋予是个很复杂的事。为了解决这一问题，下面来介绍一下纹理贴图技术。纹理是一张2维平面图像（也可以是1维和3维），应用纹理到模型可以想象成将图片按某种方式包裹住一个模型，这样就可以获得颜色丰富的模型（当然贴图还有其他的用法，这里就先不介绍）。<br>
+  下面是一个纹理的例子，我们将下面的砖瓦图片应用到之前的三角形上：<br>
+<img src="https://dragon-baby.github.io/post-images/1594476939710.jpg" alt="" loading="lazy"><br>
+<img src="https://dragon-baby.github.io/post-images/1594476949600.png" alt="" loading="lazy"><br>
+  为了能够正确地将纹理映射到三角形上，我们需要判断需要那一部分图片需要映射，并指定每个纹理坐标与每个顶点坐标相对应，其他的颜色片段由片元插值完成。<br>
+  纹理的坐标系以左下角为原点，为右手坐标系，范围在1*1的方格内，下面这张图展示了映射规则：<br>
+<img src="https://dragon-baby.github.io/post-images/1594476964446.png" alt="" loading="lazy"><br>
+  由此我们可以重新定义纹理坐标（顺序与顶点的定义一致）：</p>
+<pre><code class="language-cpp">float texCoords[] = {
+    0.0f, 0.0f, 
+    1.0f, 0.0f,  
+    0.5f, 1.0f   
+};
+</code></pre>
+<p>  接下来需要进行纹理的采样，实现的方式有很多种，我们需要告知OpenGL要使用哪种采样方式。</p>
+<h1 id="纹理映射">纹理映射</h1>
+<p>  纹理坐标通常位于1*1的小方格内，如果超出这个范围的话，OpenGL会重复纹理图片。OpenGL提供了以下四种方式：</p>
+<ul>
+<li>GL_REPEAT : 默认的方式，重复纹理图片。</li>
+<li>GL_MIRRORED_REPEAT : 类似于GL_REPEAT，但每次重复都会镜像图片。</li>
+<li>GL_CLAMP_TO_EDGE : 将坐标的范围限制在(0, 0)到(1, 1)内，边缘会造成拉伸效果。</li>
+<li>GL_CLAMP_TO_BORDER : 超出范围的区域设置为用户自定义的边界颜色。<br>
+  每种方式的效果图如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594476982731.png" alt="" loading="lazy"><br>
+  我们可以通过glTexParameter方法来设置映射方式。我们需针对两个轴进行设置，s对应x，t对应y（如果是三维纹理的话r对应z）：</li>
+</ul>
+<pre><code class="language-cpp">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+</code></pre>
+<p>  glTexParameteri第一个参数为纹理目标，这种概念和前几篇文章的缓冲对象目标类似；第二个参数为纹理轴向；第三个为映射方法。（方法名最后的i代表整型，这种概念在着色器一章提到过）<br>
+  当然如果我们想使用GL_TEXTURE_BORDER需要传入边界颜色，不需要分轴向映射：</p>
+<pre><code class="language-cpp">float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);  
+</code></pre>
+<h1 id="纹理滤镜">纹理滤镜</h1>
+<p>  由于图片是由像素点构成的，所以我们需要告知OpenGL如何选择像素点映射到对应的纹理坐标上。关于这一点，OpenGL提供了几个选项，常用的是GL_NEARESE和GL_LINEAR。<br>
+  GL_NEAREST是默认的纹理滤镜方式，在这种方式下，OpenGL会选择里纹理坐标最近的像素点来进行映射。如下是一个例子，十字线代表纹理坐标的位置：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477003650.png" alt="" loading="lazy"><br>
+  GL_LINEAR按周围像素点的距离影响获得一个插值结果，离纹理坐标越近，对颜色的影响越大。如下是一个例子：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477027352.png" alt="" loading="lazy"><br>
+  下面是针对同一张图片应用两种不同方式的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477040304.png" alt="" loading="lazy"><br>
+  可以看到，GL_NEAREST可以较为清晰的看到像素点，而GL_LINEAR有一种模糊的效果。可以按实际情况选择不同的方式。<br>
+  贴图滤镜可以为放大和缩小图片设置，缩小时我们应用GL_NEAREST，放大是我们应用GL_LINEAR是一种比较好的办法。同样，我们通过glTexParameteri方法来为放大和缩小进行滤镜设置：</p>
+<pre><code class="language-cpp">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+</code></pre>
+<p>#Mipmaps<br>
+  在实际应用中，我们针对一个模型可能会准备两套纹理，在视角靠近模型时，我们绘制用高分辨率纹理，当视角远离时，我们又会换上低分辨率纹理来节省资源。针对高分辨率纹理，通过纹理坐标获取正确的像素点颜色是比较困难的，尤其是将高分辨率图片应用到较小的物体上时。<br>
+  为解决这一问题，OpenGL使用Mipmaps的技术，简要来说就是大量同一类型纹理的集合，按顺序排列，后一张纹理是前一张纹理的大小的一半，OpenGL会按照与视角之间的距离切换不同的纹理应用到模型上。Mipmaps大概长这样：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477054510.png" alt="" loading="lazy"><br>
+  虽说这项工作很复杂，但OpenGL已经帮我们做好了大部分工作，我们可以通过glGenerateMipmaps方法来设置mipmaps。<br>
+  当然，就和纹理映射一样，转换不同的mipmap时可能会有点视觉上的问题，我们同样可以添加相应的滤镜，这里OpenGL提供了四种方式：</p>
+<ul>
+<li>GL_NEAREST_MIPMAP_NEAREST</li>
+<li>GL_LINEAR_MIPMAP_NEAREST</li>
+<li>GL_NEAREST_MIPMAP_LINEAR</li>
+<li>GL_LINEAR_MIPMAP_LINEAR<br>
+  我们可以将GL_****和MIPMAP_****拆开理解，相当于MIPMAP方式和滤镜的组合。同样，可以使用glTexParameteri方法来设置：</li>
+</ul>
+<pre><code class="language-cpp">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+</code></pre>
+<p>  一个常见的错误是为图片放大时设置mipmaps滤镜，这并不会起作用，按照之前的说明，mipmaps主要是为缩小时使用的，若设置的话会报错。</p>
+<h1 id="加载和创建纹理">加载和创建纹理</h1>
+<p>  如今，图片的格式非常之多，如果手动为每种图片格式设置加载的代码会是一件很麻烦的事。当然，我们使用现成的库，如stb_image.h，下载地址在<a href="https://github.com/nothings/stb/blob/master/stb_image.h">这里</a>。我们只需要这个头文件就可以。按照文件内部的说明，我们在其他包含文件调用后，这样使用stb_image.h：</p>
+<pre><code class="language-cpp">#define STB_IMAGE_IMPLEMENTATION
+#include &quot;stb_image.h&quot;
+</code></pre>
+<p>  接下来的案例我们会使用下面这张木箱纹理：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477079021.jpg" alt="" loading="lazy"><br>
+  使用stb_load方法加载图片：</p>
+<pre><code class="language-cpp">int width, height, nrChannels;
+unsigned char* data = stbi_load(&quot;container.jpg&quot;, &amp;width, &amp;height, &amp;nrChannels, 0);
+</code></pre>
+<p>  stb_load方法的第一个参数为图片的路径；第二个和第三个参数为图片的宽和高地址；第四个参数为图片的通道地址；最后一个参数设为0即可。方法将返回图片的信息。</p>
+<h1 id="生成纹理">生成纹理</h1>
+<p>  和之前的对象一样，绑定一个ID：</p>
+<pre><code class="language-cpp">unsigned int texture;
+glGenTexture(1, &amp;texture);
+</code></pre>
+<p>  绑定纹理对象到对应位置</p>
+<pre><code class="language-cpp">glBindTexture(GL_TEXTURE_2D, texture);
+</code></pre>
+<p>  接着通过之前的图片数据生成纹理，使用glTexImage2D，并使用glGenerateMipmap生成mipmaps:</p>
+<pre><code class="language-cpp">glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+glGenerateMipmap(GL_TEXTURE_2D);
+</code></pre>
+<p>  glTexImage2D方法的第一个参数时纹理目标，即纹理对象所绑定的位置；第二个参数代表mipmap等级，如果想手动修改就设为其他的数，这里我们简单的设置为0；第三个参数为结果纹理的通道模式；第四和五个参数代表纹理的宽高；第六个参数一定要设为0（历史原因）；第七个参数代表源文件的通道模式；第八个参数代表源文件的数据类型；最后一个参数是要加载的图像数据。<br>
+  现在纹理图片已经附加在纹理对象上了，但我们仍需手动设置Mipmaps，所以我们需要在生成纹理后调用glGenerateMipmap方法。<br>
+  上述工作结束后，我们释放一下内存空间：</p>
+<pre><code class="language-cpp">stbi_image_free(data);
+</code></pre>
+<p>  综合上述流程，完整的生成纹理的过程如下：</p>
+<pre><code class="language-cpp">unsigned int texture;
+glGenTextures(1, &amp;texture);
+glBindTexture(GL_TEXTURE_2D, texture);
+// 设置映射方式和滤镜
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+// 加载图片和生成纹理
+int width, height, nrChannels;
+unsigned char *data = stbi_load(&quot;container.jpg&quot;, &amp;width, &amp;height, &amp;nrChannels, 0);
+if (data)
+{
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+else
+{
+    std::cout &lt;&lt; &quot;Failed to load texture&quot; &lt;&lt; std::endl;
+}
+stbi_image_free(data);
+</code></pre>
+<h1 id="应用纹理">应用纹理</h1>
+<p>  接下来我们在之前绘制四边形的代码的基础上应用纹理。首先修改一下顶点的属性：</p>
+<pre><code class="language-cpp">float vertices[] = {
+      // 位置               // 颜色            // 纹理坐标
+     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   
+     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   
+    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    
+};
+</code></pre>
+<p>  同样，顶点的属性构成如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477108302.png" alt="" loading="lazy"><br>
+  我们添加纹理坐标对应的顶点属性指针：</p>
+<pre><code class="language-cpp">glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+glEnableVertexAttribArray(2);  
+</code></pre>
+<p>  接着修改顶点着色器，新增纹理坐标作为输入和输出：</p>
+<pre><code class="language-cpp">#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
+
+out vec3 ourColor;
+out vec2 TexCoord;
+
+void main()
+{
+  gl_Position = vec4(aPos, 1.0);
+  ourColor = aColor;
+  TexCoord = aTexCoord;
+}
+</code></pre>
+<p>  片元着色器将纹理坐标作为输入，但如何将纹理对象传递给片元着色器？GLSL有一个内建的数据类型sampler，同时将1D,2D,3D作为后缀，这里我们使用sampler2D。我们可以用uniform声明一个sampler2D的纹理变量，之后我们可以将纹理传递给这个变量：</p>
+<pre><code class="language-cpp">#version 330 core
+out vec4 FragColor;
+
+in vec3 ourColor;
+in vec2 TexCoord;
+
+uniform sampler2D ourTexture;
+
+void main()
+{
+  FragColor = texture(ourTexture, TexCoord);
+}
+</code></pre>
+<p>  为了采样纹理的颜色我们使用内建的texture方法，第一个参数接受一个纹理采样器，第二个参数对应纹理坐标。<br>
+  在上述工作结束后，接下来要做的就是在渲染循环中的绘制命令前绑定纹理，这个方法会自动的将纹理对象传递给片元着色器的纹理采样器：</p>
+<pre><code class="language-cpp">glBindTexture(GL_TEXTURE_2D, texture);
+glBindVertexArray(VAO);
+glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+</code></pre>
+<p>  编译并运行，就会得到这样的结果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477134795.png" alt="" loading="lazy"><br>
+  在这里贴上原文代码供参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/1.getting_started/4.1.textures/textures.cpp">Code</a><br>
+  注意到我们并未在片元着色器中使用自定义的颜色属性，我们可以修改一下输出：</p>
+<pre><code class="language-cpp">FragColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);
+</code></pre>
+<p>  然后可以得到这样的效果：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477148653.png" alt="" loading="lazy"></p>
+<h1 id="纹理单元">纹理单元</h1>
+<p>  根据经验我们会发现一个问题，sampler2D类型的变量我们使用uniform方式声明的，但却不需要额外的赋予变量一个值。因为这里就一张贴图，这么做没什么问题，但若是有多张贴图的话，我们就需要手动的赋值了。跟之前一样，我们需要获取纹理变量的位置并通过glUniform方法赋值，这种纹理的位置我们成为纹理单元。<br>
+  在面对多张纹理的情况时，我们只需要先激活对应位置的纹理单元，然后在进行纹理的绑定即可。这里我们使用glActiveTexture来激活纹理单元：</p>
+<pre><code class="language-cpp">glActiveTexture(GL_TEXTURE0);
+glBindTexture(GL_TEXTURE_2D, texture);
+</code></pre>
+<p>  在激活纹理单元后，glBindTexture将纹理对象绑定至对应的纹理单元。在OpenGL中，有0-15共16个纹理单元可以使用，GL_TEXTURE0至GL_TEXTURE15，当然，由于是按顺序定义的，也可以使用GL_TEXTUREx+y（如GL_TEXTURE8可以表示为GL_TEXTURE0 + 8）这种方式来表示纹理单元，这在循环时非常有用。<br>
+  下面这个例子我们为正方形贴上两张贴图，片元着色器修改如下：</p>
+<pre><code class="language-cpp">#version 330 core
+...
+
+uniform sampler2D texture1;
+uniform sampler2D texture2;
+
+void main()
+{
+    FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
+}
+</code></pre>
+<p>  我们使用内建的mix方法来混合两张贴图，第三个参数代表后一个纹理的权重。<br>
+  我们将下面这张图片作为第二张纹理：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477162497.png" alt="" loading="lazy"><br>
+  同样配置好各种纹理对象的参数，映射方式和滤镜，注意，图片的加载略有不同：</p>
+<pre><code class="language-cpp">unsigned char *data = stbi_load(&quot;awesomeface.png&quot;, &amp;width, &amp;height, &amp;nrChannels, 0);
+if (data)
+{
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+</code></pre>
+<p>  由于图片为.png格式，带有透明通道，所以其中一个代表源文件的通道模式的参数我们改为GL_RGBA，结果纹理的通道目前暂时设为GL_RGB即可。<br>
+  就像之前说的，我们需要先设置uniform变量：</p>
+<pre><code class="language-cpp">ourShader.use();   //一定要先激活着色器程序
+glUniform1i(glGetUniformLocation(ourShader.ID, &quot;texture1&quot;), 0);  // 手动设置方式（所赋值对应纹理单元的序号）
+ourShader.setInt(&quot;texture2&quot;, 1);   //使用我们的自定义类进行设置
+</code></pre>
+<p>  接着在渲染循环中如下设置，注意先激活纹理单元再绑定纹理对象：</p>
+<pre><code class="language-cpp">glActiveTexture(GL_TEXTURE0);
+glBindTexture(GL_TEXTURE_2D, texture1);
+glActiveTexture(GL_TEXTURE1);
+glBindTexture(GL_TEXTURE_2D, texture2);
+
+glBindVertexArray(VAO);
+glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); 
+</code></pre>
+<p>  若设置正确可得到下面的结果：</p>
+<p><img src="https://dragon-baby.github.io/post-images/1594477210546.png" alt="" loading="lazy"><br>
+  注意到图片反了，这是由于OpenGL中定义纹理坐标时以左下角为原点，而图片往往以左上角为原点，我们用下面的命令在加载图片的时候翻转一下：</p>
+<pre><code class="language-cpp">stbi_set_flip_vertically_on_load(true);  
+</code></pre>
+<p>  最终效果如下：<br>
+<img src="https://dragon-baby.github.io/post-images/1594477222399.png" alt="" loading="lazy"><br>
+这里给出原文代码供参考：<a href="https://learnopengl.com/code_viewer_gh.php?code=src/1.getting_started/4.2.textures_combined/textures_combined.cpp">Code</a></p>
+<p>  最后，请多多关注原文：<a href="https://learnopengl.com/Getting-started/Textures">https://learnopengl.com/Getting-started/Textures</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://dragon-baby.github.io/post/ji-suan-ji-tu-xing-xue-openglzhao-se-qi/" class="post-title gt-a-link">
+                    计算机图形学(OPENGL):着色器
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '11fb015a625e65944a67',
+    clientSecret: 'ff0b0f97568677171375f9634f60a209a8e9886c',
+    repo: 'Dragon-Baby.github.io',
+    owner: 'Dragon-Baby',
+    admin: ['Dragon-Baby'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">嗨皮每一天</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://dragon-baby.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
